@@ -18,8 +18,14 @@ function App() {
 	const [accountInfo, setAccountInfo] = useState('Connect your wallet to get started');
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState('');
+	const [theme, setTheme] = useState('light');
 
 	useEffect(() => {
+		// Load theme preference from localStorage
+		const savedTheme = localStorage.getItem('theme') || 'light';
+		setTheme(savedTheme);
+		document.documentElement.setAttribute('data-theme', savedTheme);
+		
 		initializeWeb3();
 		setupAccountChangeListener();
 
@@ -55,6 +61,13 @@ function App() {
 		});
 	};
 
+	const handleThemeToggle = () => {
+		const newTheme = theme === 'light' ? 'dark' : 'light';
+		setTheme(newTheme);
+		document.documentElement.setAttribute('data-theme', newTheme);
+		localStorage.setItem('theme', newTheme);
+	};
+
 	const renderTabContent = () => {
 		if (loading) {
 			return <div className="content-section active"><div className="loading">Initializing Web3...</div></div>;
@@ -74,7 +87,7 @@ function App() {
 
 	return (
 		<div className="container">
-			<Header accountInfo={accountInfo} />
+			<Header accountInfo={accountInfo} theme={theme} onThemeToggle={handleThemeToggle} />
 
 			<MessageDisplay
 				message={error ? { text: error, type: 'error' } : { text: '', type: '' }}
@@ -100,9 +113,9 @@ function App() {
 
 function getTabLabel(tab) {
 	const labels = {
-		[TABS.CREATE]: 'Create Poll',
-		[TABS.VOTE]: 'Vote in Poll',
-		[TABS.RESULTS]: 'View Results',
+		[TABS.CREATE]: '📝 Create Poll',
+		[TABS.VOTE]: '✅ Vote in Poll',
+		[TABS.RESULTS]: '📊 View Results',
 	};
 	return labels[tab];
 }

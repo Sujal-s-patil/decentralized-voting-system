@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "compile": "cd contract && npx truffle compile",
     "migrate": "cd contract && npx truffle migrate",
-    "reset": "cd contract && npx truffle migrate --reset"
+    "reset": "cd contract && npx truffle migrate --reset",
+    "setup": "bash setup.sh"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",

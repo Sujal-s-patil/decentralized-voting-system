@@ -2,7 +2,6 @@
   "name": "voting-system-based-on-blockchain",
   "private": true,
   "version": "0.0.0",
-  
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -13,6 +12,7 @@
     "reset": "cd contract && npx truffle migrate --reset"
   },
   "dependencies": {
+    "@mui/icons-material": "^7.3.7",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "web3": "^4.16.0"

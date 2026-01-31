@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520">
+  <style>
+    .title { font: 700 22px Arial, sans-serif; fill: #1f2937; }
+    .label { font: 600 16px Arial, sans-serif; fill: #111827; }
+    .box { fill: #f8fafc; stroke: #94a3b8; stroke-width: 2; rx: 10; }
+    .tab { fill: #e2e8f0; stroke: #94a3b8; stroke-width: 1.5; rx: 8; }
+  </style>
+
+  <text x="40" y="40" class="title">Frontend Layout (React UI)</text>
+
+  <rect x="60" y="70" width="1080" height="400" class="box" />
+  <rect x="90" y="100" width="180" height="40" class="tab" />
+  <text x="110" y="128" class="label">Create Poll</text>
+
+  <rect x="290" y="100" width="160" height="40" class="tab" />
+  <text x="315" y="128" class="label">Vote Poll</text>
+
+  <rect x="470" y="100" width="170" height="40" class="tab" />
+  <text x="490" y="128" class="label">View Results</text>
+
+  <rect x="100" y="170" width="460" height="120" class="box" />
+  <text x="120" y="205" class="label">Form Area</text>
+  <text x="120" y="232" class="label">Question + Options</text>
+
+  <rect x="600" y="170" width="480" height="120" class="box" />
+  <text x="620" y="205" class="label">Wallet & Status</text>
+  <text x="620" y="232" class="label">Messages / Alerts</text>
+
+  <rect x="100" y="320" width="980" height="120" class="box" />
+  <text x="120" y="355" class="label">Results / Charts / Poll List</text>
+</svg>

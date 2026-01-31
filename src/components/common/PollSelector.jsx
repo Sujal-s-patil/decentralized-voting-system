@@ -1,3 +1,7 @@
+/**
+ * Poll selector dropdown component
+ * Displays available polls and handles selection changes
+ */
 export default function PollSelector({ polls, selectedPollId, onPollSelect }) {
 	return (
 		<div className="form-group">
@@ -6,6 +10,7 @@ export default function PollSelector({ polls, selectedPollId, onPollSelect }) {
 				id="poll-select"
 				value={selectedPollId}
 				onChange={(e) => onPollSelect(e.target.value)}
+				aria-label="Select a poll"
 			>
 				<option value="">-- Select a Poll --</option>
 				{polls.map((poll) => (

@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="520" viewBox="0 0 1200 520">
+  <style>
+    .title { font: 700 22px Arial, sans-serif; fill: #1f2937; }
+    .label { font: 600 16px Arial, sans-serif; fill: #111827; }
+    .box { fill: #ecfeff; stroke: #06b6d4; stroke-width: 2; rx: 12; }
+    .box-alt { fill: #fef9c3; stroke: #eab308; stroke-width: 2; rx: 12; }
+    .box-dark { fill: #ede9fe; stroke: #7c3aed; stroke-width: 2; rx: 12; }
+    .arrow { stroke: #4b5563; stroke-width: 2.5; fill: none; marker-end: url(#arrow); }
+  </style>
+  <defs>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+      <path d="M0,0 L10,3 L0,6 Z" fill="#4b5563" />
+    </marker>
+  </defs>
+
+  <text x="40" y="40" class="title">Blockchain Voting System — Architecture</text>
+
+  <rect x="40" y="90" width="220" height="70" class="box" />
+  <text x="70" y="132" class="label">User Browser</text>
+
+  <rect x="300" y="90" width="240" height="70" class="box" />
+  <text x="330" y="132" class="label">React + Vite UI</text>
+
+  <rect x="580" y="90" width="200" height="70" class="box-alt" />
+  <text x="635" y="132" class="label">Web3.js</text>
+
+  <rect x="820" y="90" width="200" height="70" class="box-alt" />
+  <text x="860" y="132" class="label">MetaMask</text>
+
+  <rect x="300" y="220" width="240" height="70" class="box-dark" />
+  <text x="340" y="262" class="label">Ganache Network</text>
+
+  <rect x="580" y="220" width="240" height="70" class="box-dark" />
+  <text x="610" y="262" class="label">Polling.sol Contract</text>
+
+  <rect x="860" y="220" width="260" height="70" class="box-dark" />
+  <text x="895" y="262" class="label">On-chain Poll Data</text>
+
+  <path d="M260,125 L300,125" class="arrow" />
+  <path d="M540,125 L580,125" class="arrow" />
+  <path d="M780,125 L820,125" class="arrow" />
+  <path d="M920,160 C920,210 820,220 780,255" class="arrow" />
+  <path d="M540,255 L580,255" class="arrow" />
+  <path d="M820,255 L860,255" class="arrow" />
+  <path d="M420,160 C420,205 420,220 420,220" class="arrow" />
+</svg>

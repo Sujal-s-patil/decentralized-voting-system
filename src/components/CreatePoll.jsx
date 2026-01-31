@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { createPoll } from '../utils/app';
 import MessageDisplay from './common/MessageDisplay';
+import { useMessage } from '../hooks/useMessage';
 
 const MIN_OPTIONS = 2;
 const MAX_OPTIONS = 10;
@@ -8,8 +9,8 @@ const MAX_OPTIONS = 10;
 export default function CreatePoll() {
 	const [question, setQuestion] = useState('');
 	const [options, setOptions] = useState(['', '']);
-	const [message, setMessage] = useState({ text: '', type: '' });
 	const [loading, setLoading] = useState(false);
+	const { message, showMessage } = useMessage();
 
 	const handleAddOption = () => {
 		if (options.length < MAX_OPTIONS) {
@@ -27,12 +28,18 @@ export default function CreatePoll() {
 		}
 	};
 
+	/**
+	 * Update a single option value
+	 */
 	const handleOptionChange = (index, value) => {
 		const newOptions = [...options];
 		newOptions[index] = value;
 		setOptions(newOptions);
 	};
 
+	/**
+	 * Validate form before submission
+	 */
 	const validateForm = () => {
 		if (!question.trim()) {
 			showMessage('Please enter a question', 'error');
@@ -48,6 +55,9 @@ export default function CreatePoll() {
 		return true;
 	};
 
+	/**
+	 * Submit poll to blockchain
+	 */
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 
@@ -69,11 +79,9 @@ export default function CreatePoll() {
 		}
 	};
 
-	const showMessage = (text, type) => {
-		setMessage({ text, type });
-		setTimeout(() => setMessage({ text: '', type: '' }), 5000);
-	};
-
+	/**
+	 * Reset form to initial state
+	 */
 	const resetForm = () => {
 		setQuestion('');
 		setOptions(['', '']);

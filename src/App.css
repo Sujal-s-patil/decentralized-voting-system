@@ -51,7 +51,6 @@ body {
 	min-height: 100vh;
 	font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 	color: var(--text);
-	min-width: 1024px;
 	transition: background 0.3s ease, color 0.3s ease;
 }
 
@@ -93,58 +92,6 @@ body {
 .header__subtitle {
 	color: var(--muted);
 	margin-bottom: var(--spacing-sm);
-}
-
-.wallet-status {
-	display: grid;
-	grid-template-columns: auto 1fr 1fr auto;
-	gap: var(--spacing-sm);
-	align-items: center;
-	background: var(--surface);
-	border: 1px solid var(--border);
-	border-radius: var(--radius-md);
-	padding: var(--spacing-sm) var(--spacing-md);
-	box-shadow: var(--shadow);
-	text-align: left;
-}
-
-.wallet-status__block {
-	display: flex;
-	flex-direction: column;
-	gap: 2px;
-}
-
-.wallet-status__label {
-	font-size: 0.7rem;
-	text-transform: uppercase;
-	letter-spacing: 0.08em;
-	color: var(--muted);
-	font-weight: 600;
-}
-
-.wallet-status__value {
-	font-size: 0.95rem;
-	font-weight: 600;
-	color: var(--text);
-}
-
-.status-dot {
-	width: 10px;
-	height: 10px;
-	border-radius: 50%;
-	background: rgba(148, 163, 184, 0.9);
-	box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.18);
-}
-
-.status-dot--connected {
-	background: var(--success);
-	box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
-}
-
-.status-dot--disconnected,
-.status-dot--no-wallet {
-	background: rgba(148, 163, 184, 0.9);
-	box-shadow: 0 0 0 4px rgba(148, 163, 184, 0.16);
 }
 
 /* ===== THEME TOGGLE ===== */
@@ -360,36 +307,6 @@ textarea {
 	box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
-.btn--compact {
-	padding: 8px 12px;
-	font-size: 0.85rem;
-	border-radius: 999px;
-}
-
-.btn--small {
-	padding: 6px 10px;
-	font-size: 0.8rem;
-	border-radius: 999px;
-}
-
-.btn--ghost {
-	background: transparent;
-	border: 1px solid var(--border);
-	color: var(--text);
-	box-shadow: none;
-}
-
-.btn--ghost:hover:not(:disabled) {
-	border-color: rgba(139, 92, 246, 0.4);
-	color: var(--accent);
-}
-
-.btn__loading {
-	display: inline-flex;
-	align-items: center;
-	gap: 8px;
-}
-
 .btn--add {
 	margin-top: var(--spacing-sm);
 	align-self: flex-start;
@@ -404,16 +321,15 @@ textarea {
 }
 
 .hint-text {
-	font-size: 0.75rem;
-	color: var(--muted);
-	margin-top: 4px;
-	margin-bottom: var(--spacing-xs);
+	display: flex;
+	gap: var(--spacing-sm);
+	align-items: stretch;
 }
 
 .option-input {
 	display: flex;
 	gap: var(--spacing-sm);
-	align-items: stretch;
+	align-items: center;
 }
 
 .option-input input {
@@ -527,30 +443,6 @@ textarea {
 	box-shadow: var(--shadow);
 	animation: toastIn 0.35s ease;
 	font-size: 0.92rem;
-}
-
-.message__content {
-	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: var(--spacing-sm);
-}
-
-.message__details,
-.message__meta {
-	margin-top: var(--spacing-xs);
-	font-size: 0.85rem;
-	opacity: 0.9;
-}
-
-.message__meta a {
-	color: var(--accent);
-	text-decoration: none;
-	font-weight: 600;
-}
-
-.message__meta a:hover {
-	text-decoration: underline;
 }
 
 .message--success {

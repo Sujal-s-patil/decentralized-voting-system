@@ -1,12 +1,12 @@
-# 🗳️ Blockchain Voting System - Complete End-to-End Documentation
+# Blockchain Voting System — Complete End-to-End Documentation
 
 **Version:** 1.0  
 **Last Updated:** January 31, 2026  
-**Status:** Production Ready ✅
+**Status:** Production Ready
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
 1. [Project Overview](#project-overview)
 2. [Why Use This System](#why-use-this-system)
@@ -27,27 +27,27 @@
 
 ---
 
-## 🎯 Project Overview
+## Project Overview
 
 ### What Is This Project?
 
-The **Blockchain Voting System** is a decentralized voting application built on Ethereum blockchain technology. It provides a secure, transparent, and tamper-proof platform for conducting polls and collecting votes.
+The **Blockchain Voting System** is a decentralized voting application built on Ethereum. It provides a secure, transparent, and tamper‑evident platform for creating polls and collecting votes.
 
 The application combines:
-- **React** for the modern, responsive user interface
+- **React** for the user interface
 - **Web3.js** for blockchain interactions
-- **Solidity Smart Contract** for secure vote storage and management
+- **Solidity smart contracts** for vote storage and rules
 - **Ganache** for local blockchain testing
 
 ### Purpose
 
 This system enables:
-- **Secure Voting**: All votes are immutably recorded on the blockchain
-- **Transparency**: Every participant can verify the voting process
-- **Decentralization**: No central authority controls the results
-- **Fraud Prevention**: Once cast, votes cannot be altered or duplicated
-- **Anonymity**: Voters are identified only by their Ethereum address
-- **Accessibility**: Web-based interface accessible from any modern browser
+- **Secure voting**: Votes are immutably recorded on-chain
+- **Transparency**: Anyone can verify results
+- **Decentralization**: No central authority controls outcomes
+- **Fraud prevention**: Duplicate voting is prevented by contract logic
+- **Pseudonymity**: Voters are identified by Ethereum address
+- **Accessibility**: Web UI for any modern browser
 
 ### Use Cases
 
@@ -60,7 +60,7 @@ This system enables:
 
 ---
 
-## 🚀 Why Use This System
+## Why Use This System
 
 ### Advantages Over Traditional Voting Systems
 
@@ -77,18 +77,18 @@ This system enables:
 
 ### Key Advantages
 
-✅ **Immutable Records**: Once recorded on blockchain, votes cannot be changed or deleted
-✅ **Cryptographic Security**: Each transaction is cryptographically signed
-✅ **Decentralized**: No single point of failure or control
-✅ **Transparent**: All vote counts can be publicly verified
-✅ **Automated**: Smart contracts execute rules without intermediaries
-✅ **Scalable**: Can handle any number of polls and voters
-✅ **Audit Trail**: Complete history of all transactions
-✅ **User-Friendly**: Web interface accessible to non-technical users
+- **Immutable records**: Once recorded on-chain, votes cannot be altered
+- **Cryptographic security**: Transactions are signed and verifiable
+- **Decentralized**: No single point of failure or control
+- **Transparent**: Results are publicly verifiable
+- **Automated**: Smart contracts execute rules without intermediaries
+- **Scalable**: Supports any number of polls and voters
+- **Audit trail**: Complete on-chain history
+- **User‑friendly**: Web interface accessible to non‑technical users
 
 ---
 
-## ✨ Key Features
+## Key Features
 
 ### Core Features
 
@@ -127,7 +127,7 @@ This system enables:
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ### Frontend
 
@@ -135,9 +135,11 @@ This system enables:
 |-----------|---------|---------|
 | **React** | 19.2.0 | UI framework and component management |
 | **React DOM** | 19.2.0 | DOM rendering for React |
+| **Material-UI (MUI)** | 7.3.7 | UI component library and icons |
+| **Emotion** | 11.14.0 | CSS-in-JS styling (MUI dependency) |
 | **Vite** | 7.2.4 | Modern build tool and dev server |
 | **JavaScript (ES6+)** | - | Core programming language |
-| **CSS3** | - | Styling with CSS variables and Grid/Flexbox |
+| **CSS3** | - | Styling with CSS variables and themes |
 
 ### Blockchain & Web3
 
@@ -160,56 +162,69 @@ This system enables:
 
 ---
 
-## 🏗️ System Architecture
+## System Architecture
 
 ### High-Level Architecture Diagram
 
 ```
 ┌────────────────────────────────────────────────────────────────┐
-│                    USER INTERFACE (React)                       │
-│                                                                  │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐         │
-│  │ Create Poll  │  │  Vote Poll   │  │ View Results │         │
-│  └──────────────┘  └──────────────┘  └──────────────┘         │
+│                    USER INTERFACE (React 19.2)                 │
+│                                                                │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
+│  │ CreatePoll   │  │  VotePoll    │  │ ViewResults  │          │
+│  │ Component    │  │  Component   │  │ Component    │          │
+│  └──────────────┘  └──────────────┘  └──────────────┘          │
+│                                                                │
+│  Material-UI Components (Icons, Styling)                       │
+│  Custom Hooks (useMessage)                                     │
+│  Reusable Components (MessageDisplay, PollSelector, Chart)     │
 └────────────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌────────────────────────────────────────────────────────────────┐
-│                  WEB3.JS INTEGRATION LAYER                      │
-│                    (blockchain connector)                       │
-│                                                                  │
-│  - Web3 Provider Setup                                          │
-│  - Account Management                                           │
-│  - Contract Interactions                                        │
-│  - Transaction Signing                                          │
+│              WEB3.JS INTEGRATION (src/utils/app.js)            │
+│                                                                │
+│  • initWeb3() - Initialize provider                            │
+│  • createPoll() - Create new poll transaction                  │
+│  • vote() - Cast vote transaction                              │
+│  • getPollDetails() - Fetch poll data                          │
+│  • getPollResults() - Fetch vote counts                        │
+│  • hasUserVoted() - Check vote status                          │
+│  • Contract ABI + Address management                           │
 └────────────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌────────────────────────────────────────────────────────────────┐
-│              METAMASK / ETHEREUM NODE                            │
-│                                                                  │
-│  - Wallet Management                                            │
-│  - Transaction Signing                                          │
-│  - Account Balance                                              │
-│  - Network Selection                                            │
+│              METAMASK WALLET (Browser Extension)               │
+│                                                                │
+│  • Account management and switching                            │
+│  • Transaction signing and approval                            │
+│  • Network management (Ganache: Chain ID 0x539/1337)           │
+│  • Gas estimation and payment                                  │
 └────────────────────────────────────────────────────────────────┘
                             │
                             ▼
 ┌────────────────────────────────────────────────────────────────┐
-│              ETHEREUM BLOCKCHAIN / GANACHE                       │
-│                                                                  │
+│         ETHEREUM BLOCKCHAIN (Ganache Local Network)            │
+│                      127.0.0.1:7545                            │
+│                                                                │
 │  ┌──────────────────────────────────────────────────────────┐  │
-│  │         POLLING SMART CONTRACT (Solidity)               │  │
-│  │                                                           │  │
-│  │  • Poll Management (create, read)                        │  │
-│  │  • Voting Logic (cast votes, prevent duplicates)         │  │
-│  │  • Results Calculation                                   │  │
-│  │  • Event Logging                                         │  │
-│  │                                                           │  │
-│  │  Storage:                                                │  │
-│  │  • polls mapping (pollId → Poll)                         │  │
-│  │  • votes mapping (pollId → optionIndex → count)          │  │
-│  │  • hasVoted mapping (pollId → voter → bool)              │  │
+│  │         POLLING SMART CONTRACT (Solidity 0.8.19)         │  │
+│  │                                                          │  │
+│  │  State Variables:                                        │  │
+│  │  • polls: mapping(uint256 => Poll)                      │  │
+│  │  • pollCount: uint256 (counter)                         │  │
+│  │                                                          │  │
+│  │  Functions:                                              │  │
+│  │  • createPoll(question, options) → pollId               │  │
+│  │  • vote(pollId, optionIndex)                            │  │
+│  │  • getPollDetails(pollId) → poll data                   │  │
+│  │  • getPollResults(pollId) → vote counts                 │  │
+│  │  • hasVoted(pollId, voter) → boolean                    │  │
+│  │                                                          │  │
+│  │  Events:                                                 │  │
+│  │  • PollCreated(pollId, question, creator)               │  │
+│  │  • Voted(pollId, optionIndex, voter)                    │  │
 │  └──────────────────────────────────────────────────────────┘  │
 └────────────────────────────────────────────────────────────────┘
 ```
@@ -293,37 +308,65 @@ VIEW RESULTS:
 ### Component Hierarchy
 
 ```
-App (Main)
+App (Main Component)
 ├── Header
 │   ├── Title
 │   ├── Account Info
-│   └── Network Status
+│   └── Theme Toggle (Light/Dark)
 │
-├── CreatePoll
-│   ├── Question Input
-│   ├── Options Management
-│   ├── Add/Remove Buttons
-│   ├── MessageDisplay
-│   └── Submit Button
+├── MessageDisplay (Global)
+│   └── Toast notifications (top-right placement)
 │
-├── VotePoll
-│   ├── PollSelector
-│   ├── Vote Status Check
-│   ├── Options Radio Buttons
-│   ├── MessageDisplay
-│   └── Submit Button
+├── Tab Navigation
+│   ├── Create Poll Tab (with EditNoteIcon)
+│   ├── Vote in Poll Tab (with HowToVoteIcon)
+│   └── View Results Tab (with BarChartIcon)
 │
-└── ViewResults
-    ├── PollSelector
-    ├── ResultsChart
-    ├── Vote Count Display
-    ├── Percentage Display
-    └── MessageDisplay
+├── CreatePoll Component
+│   ├── Question Input Field
+│   ├── Dynamic Options List (2-10 options)
+│   ├── Add Option Button
+│   ├── Remove Option Buttons
+│   ├── Form Validation
+│   ├── MessageDisplay (local)
+│   └── Submit Button with Loading State
+│
+├── VotePoll Component
+│   ├── PollSelector Dropdown
+│   ├── hasUserVoted Check
+│   ├── Options Radio Group
+│   ├── Vote Status Display
+│   ├── MessageDisplay (local)
+│   └── Submit Vote Button with Loading State
+│
+└── ViewResults Component
+    ├── PollSelector Dropdown
+    ├── ResultsChart Component
+    │   ├── Bar Chart Visualization
+    │   ├── Percentage Calculations
+    │   └── Vote Counts Display
+    ├── Total Votes Counter
+    ├── MessageDisplay (local)
+    └── Auto-refresh on Poll Change
+
+Shared Components (src/components/common/):
+├── MessageDisplay.jsx - Status/error messages
+├── PollSelector.jsx - Poll dropdown selector
+└── ResultsChart.jsx - Visual results display
+
+Custom Hooks (src/hooks/):
+└── useMessage.js - Message state management
+
+Constants (src/constants/):
+└── tabs.js - Tab definitions and icons
+
+Utilities (src/utils/):
+└── app.js - Web3 integration functions
 ```
 
 ---
 
-## 📦 Prerequisites & Requirements
+## Prerequisites & Requirements
 
 ### System Requirements
 
@@ -355,15 +398,15 @@ App (Main)
 
 ---
 
-## 🚀 Quick Start Guide
+## Quick Start Guide
 
-### For First-Time Setup (5 minutes)
+### First‑Time Setup (5 minutes)
 
 ```bash
 # Step 1: Install dependencies
 npm install
 
-# Step 2: Start Ganache (blockchain)
+# Step 2: Start Ganache (local blockchain)
 npx ganache
 
 # Step 3: In another terminal, compile the contract
@@ -378,7 +421,7 @@ npm run dev
 
 Open your browser to `http://localhost:5173`
 
-### For Subsequent Sessions (2 minutes)
+### Subsequent Sessions (2 minutes)
 
 ```bash
 # Step 1: Start Ganache
@@ -393,7 +436,7 @@ npm run dev
 
 ---
 
-## 📝 Detailed Setup Instructions
+## Detailed Setup Instructions
 
 ### Step 1: Install Node.js and npm
 
@@ -449,7 +492,7 @@ Expected packages:
 - truffle 5.11.5
 - ganache 7.9.2
 
-### Step 4: Setup MetaMask
+### Step 4: Set Up MetaMask
 
 1. **Install MetaMask Extension**
    - Open Chrome/Firefox/Edge
@@ -510,15 +553,12 @@ Deploying 'Polling'
 
 ### Step 7: Configure the Application
 
-1. Create `.env` file in project root:
+ Create a `.env` file in the project root:
    ```
-   VITE_CONTRACT_ADDRESS=0x<paste-your-contract-address>
+   VITE_CONTRACT_ADDRESS=<paste-your-contract-address>
    ```
 
-2. Or update in `src/utils/app.js`:
-   ```javascript
-   const CONTRACT_ADDRESS = '0x<your-contract-address>';
-   ```
+
 
 ### Step 8: Start Development Server
 
@@ -544,7 +584,7 @@ Output should show:
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -606,69 +646,104 @@ const gasLimit = web3.utils.toHex(3000000);
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 voting system based on blockchain/
 │
-├── 📄 package.json                 # Project dependencies and scripts
+├── 📄 package.json                 # Dependencies and npm scripts
+├── 📄 package-lock.json            # Lock file for exact versions
 ├── 📄 vite.config.js              # Vite build configuration
-├── 📄 eslint.config.js            # Code quality rules
-├── 📄 index.html                  # Entry HTML file
-├── 📄 README.md                   # Project README
+├── 📄 eslint.config.js            # ESLint rules for code quality
+├── 📄 index.html                  # HTML entry point
+├── 📄 README.md                   # Project overview
+├── 📄 .env                        # Environment variables (CONTRACT_ADDRESS)
+├── 📄 .gitignore                  # Git ignore rules
 │
-├── 📂 src/                        # React application code
-│   ├── 📄 main.jsx               # React entry point
-│   ├── 📄 App.jsx                # Main component
-│   ├── 📄 App.css                # Main stylesheet
-│   ├── 📄 index.css              # Global styles
+├── 📂 src/                        # React application source
+│   ├── 📄 main.jsx               # React app entry point
+│   ├── 📄 App.jsx                # Root component with routing
+│   ├── 📄 App.css                # Main application styles
+│   ├── 📄 index.css              # Global CSS styles and variables
+│   ├── 📄 index.html             # Additional HTML template
 │   │
 │   ├── 📂 components/            # React components
-│   │   ├── 📄 Header.jsx         # Header with wallet info
-│   │   ├── 📄 CreatePoll.jsx     # Poll creation form
+│   │   ├── 📄 Header.jsx         # Header with wallet info and theme
+│   │   ├── 📄 CreatePoll.jsx     # Poll creation form (148 lines)
 │   │   ├── 📄 VotePoll.jsx       # Voting interface
-│   │   ├── 📄 ViewResults.jsx    # Results display
+│   │   ├── 📄 ViewResults.jsx    # Results display with charts
 │   │   │
-│   │   └── 📂 common/            # Reusable components
-│   │       ├── 📄 MessageDisplay.jsx   # Status messages
-│   │       ├── 📄 PollSelector.jsx     # Poll dropdown
-│   │       └── 📄 ResultsChart.jsx     # Results chart
+│   │   └── 📂 common/            # Reusable UI components
+│   │       ├── 📄 MessageDisplay.jsx   # Toast/alert messages
+│   │       ├── 📄 PollSelector.jsx     # Poll dropdown selector
+│   │       ├── 📄 ResultsChart.jsx     # Vote results visualization
+│   │       └── 📄 README.md            # Component documentation
+│   │
+│   ├── 📂 constants/             # Application constants
+│   │   └── 📄 tabs.js            # Tab definitions with MUI icons
+│   │
+│   ├── 📂 hooks/                 # Custom React hooks
+│   │   └── 📄 useMessage.js      # Message state management hook
 │   │
 │   └── 📂 utils/                 # Utility functions
-│       └── 📄 app.js             # Web3 integration functions
+│       ├── 📄 app.js             # Web3 integration (517 lines)
+│       └── 📄 README.md          # Utils documentation
 │
-├── 📂 contract/                  # Smart contract code
-│   ├── 📄 truffle-config.js      # Truffle configuration
-│   ├── 📄 package.json           # Contract dependencies
+├── 📂 contract/                  # Smart contract workspace
+│   ├── 📄 truffle-config.js      # Truffle framework configuration
 │   │
-│   ├── 📂 contracts/             # Solidity smart contracts
-│   │   └── 📄 Polling.sol        # Main voting contract
+│   ├── 📂 contracts/             # Solidity source files
+│   │   └── 📄 Polling.sol        # Main voting contract (81 lines)
 │   │
-│   ├── 📂 migrations/            # Deployment scripts
-│   │   └── 📄 1_deploy_contracts.js
+│   ├── 📂 migrations/            # Truffle deployment scripts
+│   │   └── 📄 1_deploy_contracts.js  # Polling contract deployment
 │   │
-│   └── 📂 build/                 # Compiled contracts
+│   └── 📂 build/                 # Compiled contract artifacts
 │       └── 📂 contracts/
-│           └── 📄 Polling.json   # Contract ABI and bytecode
+│           └── 📄 Polling.json   # ABI, bytecode, networks
 │
-├── 📂 Documentation/             # Complete documentation
-│   ├── 📄 COMPLETE_GUIDE.md     # THIS FILE
-│   ├── 📄 PROJECT_OVERVIEW.txt  # Project statistics
-│   ├── 📄 ARCHITECTURE.md       # Technical architecture
-│   ├── 📄 SETUP.md              # Setup guide
-│   ├── 📄 IMPLEMENTATION.md     # Implementation details
-│   ├── 📄 PROJECT_STRUCTURE.md  # Structure explanation
-│   ├── 📄 ENTERPRISE_STRUCTURE.md # Code guidelines
-│   ├── 📄 REFACTORING_SUMMARY.md  # Recent changes
-│   └── 📄 DOCUMENTATION_INDEX.md # Docs navigation
+├── 📂 Documentation/             # Project documentation
+│   ├── 📄 COMPLETE_GUIDE.md     # THIS FILE - Complete guide
+│   ├── 📄 ARCHITECTURE.md       # Technical architecture details
+│   ├── 📄 SETUP.md              # Setup instructions
+│   ├── 📄 PROJECT_DOCUMENTATION.md  # Overall documentation
+│   └── 📂 images/               # Documentation images
 │
-└── 📂 public/                   # Static assets
-    └── (favicon, images, etc.)
+├── 📂 Photos/                   # Project screenshots
+│   ├── create.png
+│   ├── vote.png
+│   └── result.png
+│
+├── 📂 public/                   # Static public assets
+│   └── (vite.svg, etc.)
+│
+├── 📂 dist/                     # Production build output
+│   └── (Generated by 'npm run build')
+│
+└── 📂 node_modules/             # npm dependencies (not in git)
+    └── (Third-party packages)
 ```
+
+### Key Directories Explained
+
+**`src/`** - Contains all React application code
+- `components/` - UI components organized by feature
+- `components/common/` - Reusable shared components
+- `constants/` - Configuration and constant values
+- `hooks/` - Custom React hooks for state management
+- `utils/` - Helper functions, especially Web3 integration
+
+**`contract/`** - Smart contract development environment
+- `contracts/` - Solidity source code
+- `migrations/` - Deployment scripts
+- `build/` - Compiled contracts (generated)
+
+**`Documentation/`** - Complete project documentation
+- Setup guides, architecture docs, and implementation notes
 
 ---
 
-## 🧩 Component Documentation
+## Component Documentation
 
 ### App.jsx (Main Component)
 
@@ -883,51 +958,68 @@ totalVotes: number     // Total votes cast
 
 ---
 
-## 📜 Smart Contract Details
+## Smart Contract Details
 
 ### Polling.sol
 
-**Purpose**: Manage polls and votes on Ethereum blockchain
+**Location**: `contract/contracts/Polling.sol`  
+**Purpose**: Manage decentralized polls and votes on Ethereum blockchain  
+**Language**: Solidity ^0.8.19  
+**License**: MIT  
+**Size**: 81 lines of code
 
-**Language**: Solidity 0.8.19
+### Contract Overview
+
+The Polling contract is a fully decentralized voting system that ensures:
+- **Immutable vote storage** on blockchain
+- **One vote per address** enforcement
+- **Transparent results** accessible to anyone
+- **Event-driven architecture** for off-chain monitoring
 
 ### Data Structures
 
 ```solidity
 struct Poll {
-    uint256 id;                              // Unique poll ID
-    string question;                         // Poll question
-    string[] options;                        // Answer options
-    mapping(uint256 => uint256) votes;       // Vote counts per option
-    mapping(address => bool) hasVoted;       // Track who voted
-    address creator;                         // Poll creator address
-    uint256 createdAt;                       // Creation timestamp
-    bool isActive;                           // Poll status
+    uint256 id;                              // Unique poll identifier
+    string question;                         // Poll question text
+    string[] options;                        // Array of answer options
+    mapping(uint256 => uint256) votes;       // optionIndex → vote count
+    mapping(address => bool) hasVoted;       // voter address → voted status
+    address creator;                         // Address that created poll
+    uint256 createdAt;                       // Block timestamp of creation
+    bool isActive;                           // Poll active status (currently always true)
 }
 ```
 
-### Storage
+**Note**: The Poll struct contains nested mappings, which is why it cannot be returned directly from functions. Separate getter functions are provided for different data.
+
+### State Variables
 
 ```solidity
-mapping(uint256 => Poll) public polls;       // All polls
-uint256 public pollCount;                    // Total poll count
+mapping(uint256 => Poll) public polls;       // pollId → Poll struct
+uint256 public pollCount;                    // Total number of polls created
 ```
+
+- `polls`: Main storage mapping for all polls
+- `pollCount`: Auto-increments to provide unique poll IDs (0, 1, 2, ...)
 
 ### Events
 
 ```solidity
 event PollCreated(
-    uint256 indexed pollId,
-    string question,
-    address indexed creator
+    uint256 indexed pollId,    // Indexed for filtering
+    string question,           // Poll question
+    address indexed creator    // Indexed for filtering by creator
 );
 
 event Voted(
-    uint256 indexed pollId,
-    uint256 optionIndex,
-    address indexed voter
+    uint256 indexed pollId,    // Indexed for filtering by poll
+    uint256 optionIndex,       // The option that was voted for
+    address indexed voter      // Indexed for filtering by voter
 );
 ```
+
+**Events Usage**: These events allow the frontend to listen for real-time updates and maintain a local cache of polls without repeatedly querying the blockchain.
 
 ### Functions
 
@@ -936,31 +1028,51 @@ event Voted(
 function createPoll(string memory _question, string[] memory _options) 
     public returns (uint256)
 ```
-- **Purpose**: Create a new poll
+- **Purpose**: Create a new poll and add it to the blockchain
+- **Access**: Public (anyone can create a poll)
 - **Parameters**:
-  - `_question`: Poll question (non-empty)
-  - `_options`: Answer options (2-10)
-- **Returns**: Poll ID
-- **Validation**:
-  - Question cannot be empty
-  - Must have 2-10 options
-- **Emits**: PollCreated event
+  - `_question`: Poll question (string, must not be empty)
+  - `_options`: Array of answer options (string[], must have 2-10 items)
+- **Returns**: `uint256` - The newly created poll's ID
+- **Validation** (with require statements):
+  - `require(_options.length >= 2, "Poll must have at least 2 options")`
+  - `require(_options.length <= 10, "Poll cannot have more than 10 options")`
+  - `require(bytes(_question).length > 0, "Question cannot be empty")`
+- **Process**:
+  1. Increments `pollCount` to generate new ID
+  2. Creates new Poll in storage
+  3. Sets poll properties (id, question, options, creator, timestamp)
+  4. Sets `isActive` to true
+  5. Emits `PollCreated` event
+- **Emits**: `PollCreated(pollId, question, msg.sender)`
+- **Gas Cost**: ~200,000-300,000 gas (depends on question and options length)
 
 #### vote()
 ```solidity
 function vote(uint256 _pollId, uint256 _optionIndex) public
 ```
-- **Purpose**: Cast a vote in a poll
+- **Purpose**: Cast a vote in an existing poll
+- **Access**: Public (anyone can vote)
 - **Parameters**:
-  - `_pollId`: Target poll ID
-  - `_optionIndex`: Selected option index
-- **Validation**:
-  - Poll must exist
-  - Poll must be active
-  - Voter must not have voted
-  - Option index must be valid
-- **Emits**: Voted event
-- **Security**: Prevents double voting
+  - `_pollId`: ID of the poll to vote in (uint256)
+  - `_optionIndex`: Index of the chosen option (uint256, 0-based)
+- **Validation** (with require statements):
+  - `require(_pollId < pollCount, "Poll does not exist")`
+  - `require(poll.isActive, "Poll is not active")`
+  - `require(!poll.hasVoted[msg.sender], "You have already voted")`
+  - `require(_optionIndex < poll.options.length, "Invalid option")`
+- **Process**:
+  1. Retrieves poll from storage
+  2. Validates all requirements
+  3. Increments vote count for selected option
+  4. Marks msg.sender as having voted
+  5. Emits Voted event
+- **Emits**: `Voted(pollId, optionIndex, msg.sender)`
+- **Security**: 
+  - Double voting prevented by `hasVoted` mapping
+  - Once voted, address cannot vote again in same poll
+  - No way to change or remove a vote
+- **Gas Cost**: ~50,000-70,000 gas
 
 #### getPollDetails()
 ```solidity
@@ -973,36 +1085,63 @@ function getPollDetails(uint256 _pollId)
         address creator
     )
 ```
-- **Purpose**: Get poll metadata
-- **Parameters**: `_pollId`
-- **Returns**: Poll details
-- **State**: View function (read-only)
+- **Purpose**: Retrieve poll metadata (not vote counts)
+- **Access**: Public view (read-only, no gas cost when called externally)
+- **Parameters**: `_pollId` - Poll ID to query
+- **Returns** (tuple):
+  - `question`: Poll question text
+  - `options`: Array of all option strings
+  - `createdAt`: Unix timestamp when poll was created
+  - `isActive`: Whether poll is active (currently always true)
+  - `creator`: Ethereum address that created the poll
+- **Validation**: `require(_pollId < pollCount, "Poll does not exist")`
+- **Use Case**: Frontend uses this to display poll information before voting
 
 #### getPollResults()
 ```solidity
 function getPollResults(uint256 _pollId) 
     public view returns (uint256[] memory)
 ```
-- **Purpose**: Get vote counts per option
-- **Parameters**: `_pollId`
-- **Returns**: Array of vote counts
-- **State**: View function (read-only)
+- **Purpose**: Get vote counts for all options in a poll
+- **Access**: Public view (read-only, no gas cost when called externally)
+- **Parameters**: `_pollId` - Poll ID to get results for
+- **Returns**: Array of vote counts, where index corresponds to option index
+  - Example: `[5, 12, 3]` means option 0 has 5 votes, option 1 has 12, option 2 has 3
+- **Validation**: `require(_pollId < pollCount, "Poll does not exist")`
+- **Process**:
+  1. Creates memory array with length = number of options
+  2. Loops through all options and retrieves vote count from mapping
+  3. Returns complete results array
+- **Use Case**: Frontend uses this to display vote results and calculate percentages
 
 #### hasVoted()
 ```solidity
 function hasVoted(uint256 _pollId, address _voter) 
     public view returns (bool)
 ```
-- **Purpose**: Check if address has voted
+- **Purpose**: Check if a specific address has already voted in a poll
+- **Access**: Public view (read-only, no gas cost when called externally)
 - **Parameters**:
-  - `_pollId`: Target poll
-  - `_voter`: Address to check
-- **Returns**: true if voted, false otherwise
-- **State**: View function (read-only)
+  - `_pollId`: Poll ID to check
+  - `_voter`: Ethereum address to check voting status for
+- **Returns**: `true` if address has voted, `false` if not
+- **Validation**: `require(_pollId < pollCount, "Poll does not exist")`
+- **Use Case**: 
+  - Frontend checks this before allowing user to vote
+  - Prevents showing vote interface to users who already voted
+  - Can check voting status of any address (not just current user)
+
+### Contract Limitations
+
+1. **No poll deletion**: Once created, polls exist forever on-chain
+2. **No vote changes**: Votes are immutable and cannot be changed
+3. **No poll closing**: Currently all polls remain active (isActive always true)
+4. **No voter anonymity**: All votes are linked to Ethereum addresses
+5. **Gas costs**: Creating polls and voting requires gas fees
 
 ---
 
-## 💡 Usage Guide
+## Usage Guide
 
 ### Creating a Poll
 
@@ -1051,7 +1190,7 @@ function hasVoted(uint256 _pollId, address _voter)
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues and Solutions
 
@@ -1194,7 +1333,7 @@ console.log('[DEBUG]', message)
 
 ---
 
-## 👨‍💻 Development Workflow
+## Development Workflow
 
 ### Development Environment Setup
 
@@ -1297,7 +1436,7 @@ npm run build
 
 ---
 
-## 🚀 Deployment Guide
+## Deployment Guide
 
 ### Local Testing (Current Setup)
 
@@ -1379,7 +1518,7 @@ NODE_ENV=production
 
 ---
 
-## 📚 Additional Resources
+## Additional Resources
 
 ### Official Documentation
 - [React Documentation](https://react.dev)
@@ -1402,7 +1541,7 @@ NODE_ENV=production
 
 ---
 
-## 📝 Version History
+## Version History
 
 | Version | Date | Changes |
 |---------|------|---------|
@@ -1415,7 +1554,7 @@ NODE_ENV=production
 
 ---
 
-## ✅ Quick Checklist
+## Quick Checklist
 
 Before deployment, verify:
 
@@ -1435,7 +1574,7 @@ Before deployment, verify:
 
 ---
 
-## 📞 Contact & Support
+## Contact & Support
 
 For issues or questions:
 
@@ -1448,5 +1587,5 @@ For issues or questions:
 ---
 
 **Last Updated**: January 31, 2026  
-**Status**: ✅ Complete  
+**Status**: Complete  
 **Version**: 1.0

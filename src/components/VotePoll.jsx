@@ -1,34 +1,40 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getAllPolls, hasVoted, submitVote } from '../utils/app';
 import MessageDisplay from './common/MessageDisplay';
 import PollSelector from './common/PollSelector';
+import { useMessage } from '../hooks/useMessage';
 
 export default function VotePoll() {
 	const [polls, setPolls] = useState([]);
 	const [selectedPollId, setSelectedPollId] = useState('');
 	const [selectedOption, setSelectedOption] = useState('');
-	const [message, setMessage] = useState({ text: '', type: '' });
 	const [loading, setLoading] = useState(false);
 	const [alreadyVoted, setAlreadyVoted] = useState(false);
+	const { message, showMessage } = useMessage();
 
-	useEffect(() => {
-		loadPolls();
-	}, []);
-
-	const loadPolls = async () => {
+	/**
+	 * Load all available polls from blockchain
+	 */
+	const loadPolls = useCallback(async () => {
 		try {
 			const pollsData = await getAllPolls();
 			setPolls(pollsData);
 		} catch (error) {
 			showMessage(`Error loading polls: ${error.message}`, 'error');
 		}
-	};
+	}, [showMessage]);
 
+	useEffect(() => {
+		loadPolls();
+	}, [loadPolls]);
+
+	/**
+	 * Handle poll selection and check voting status
+	 */
 	const handlePollSelect = async (pollId) => {
 		setSelectedPollId(pollId);
 		setSelectedOption('');
 		setAlreadyVoted(false);
-		setMessage({ text: '', type: '' });
 
 		if (!pollId) return;
 
@@ -43,6 +49,9 @@ export default function VotePoll() {
 		}
 	};
 
+	/**
+	 * Submit vote to blockchain
+	 */
 	const handleSubmitVote = async (e) => {
 		e.preventDefault();
 
@@ -65,11 +74,6 @@ export default function VotePoll() {
 		} finally {
 			setLoading(false);
 		}
-	};
-
-	const showMessage = (text, type) => {
-		setMessage({ text, type });
-		setTimeout(() => setMessage({ text: '', type: '' }), 5000);
 	};
 
 	const selectedPoll = polls.find(p => p.id === parseInt(selectedPollId));

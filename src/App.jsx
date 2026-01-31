@@ -6,18 +6,12 @@ import VotePoll from './components/VotePoll';
 import ViewResults from './components/ViewResults';
 import MessageDisplay from './components/common/MessageDisplay';
 import { initWeb3 } from './utils/app';
-
-const TABS = {
-	CREATE: 'create',
-	VOTE: 'vote',
-	RESULTS: 'results',
-};
+import { TABS, TAB_CONFIG } from './constants/tabs';
 
 function App() {
 	const [activeTab, setActiveTab] = useState(TABS.CREATE);
 	const [accountInfo, setAccountInfo] = useState('Connect your wallet to get started');
 	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState('');
 	const [theme, setTheme] = useState('light');
 
 	useEffect(() => {
@@ -36,28 +30,32 @@ function App() {
 		};
 	}, []);
 
+	/**
+	 * Initialize Web3 and connect to Ethereum wallet
+	 */
 	const initializeWeb3 = async () => {
 		try {
 			const result = await initWeb3();
-			setAccountInfo(`Connected Account: ${result.accounts[0]}`);
-			setError('');
-		} catch (err) {
-			setError(err.message);
+			setAccountInfo(result.accounts[0]);
+		} catch {
 			setAccountInfo('Please install MetaMask to use this application');
 		} finally {
 			setLoading(false);
 		}
 	};
 
+	/**
+	 * Listen for account changes in MetaMask
+	 */
 	const setupAccountChangeListener = () => {
 		if (typeof window.ethereum === 'undefined') return;
 
 		window.ethereum.on('accountsChanged', (newAccounts) => {
-			if (newAccounts.length > 0) {
-				setAccountInfo(`Connected Account: ${newAccounts[0]}`);
-			} else {
-				setAccountInfo('Wallet disconnected');
-			}
+			setAccountInfo(
+				newAccounts.length > 0 
+					? `Connected Account: ${newAccounts[0]}` 
+					: 'Wallet disconnected'
+			);
 		});
 	};
 
@@ -68,21 +66,26 @@ function App() {
 		localStorage.setItem('theme', newTheme);
 	};
 
+	/**
+	 * Render the active tab's content
+	 */
 	const renderTabContent = () => {
 		if (loading) {
-			return <div className="content-section active"><div className="loading">Initializing Web3...</div></div>;
+			return (
+				<div className="content-section active">
+					<div className="loading">Initializing Web3...</div>
+				</div>
+			);
 		}
 
-		switch (activeTab) {
-			case TABS.CREATE:
-				return <CreatePoll />;
-			case TABS.VOTE:
-				return <VotePoll />;
-			case TABS.RESULTS:
-				return <ViewResults />;
-			default:
-				return null;
-		}
+		const contentComponents = {
+			[TABS.CREATE]: CreatePoll,
+			[TABS.VOTE]: VotePoll,
+			[TABS.RESULTS]: ViewResults,
+		};
+
+		const Component = contentComponents[activeTab];
+		return Component ? <Component /> : null;
 	};
 
 	return (
@@ -90,18 +93,20 @@ function App() {
 			<Header accountInfo={accountInfo} theme={theme} onThemeToggle={handleThemeToggle} />
 
 			<MessageDisplay
-				message={error ? { text: error, type: 'error' } : { text: '', type: '' }}
+				message={{ text: '', type: '' }}
 				placement="top-right"
 			/>
 
 			<div className="tabs">
-				{Object.values(TABS).map((tab) => (
+				{TAB_CONFIG.map(({ id, label, icon: IconComponent }) => (
 					<button
-						key={tab}
-						className={`tab-button ${activeTab === tab ? 'active' : ''}`}
-						onClick={() => setActiveTab(tab)}
+						key={id}
+						className={`tab-button ${activeTab === id ? 'active' : ''}`}
+						onClick={() => setActiveTab(id)}
+						title={label}
 					>
-						{getTabLabel(tab)}
+						<IconComponent style={{ fontSize: '1em', verticalAlign: 'middle', marginRight: '8px' }} />
+						{label}
 					</button>
 				))}
 			</div>
@@ -109,15 +114,6 @@ function App() {
 			{renderTabContent()}
 		</div>
 	);
-}
-
-function getTabLabel(tab) {
-	const labels = {
-		[TABS.CREATE]: '📝 Create Poll',
-		[TABS.VOTE]: '✅ Vote in Poll',
-		[TABS.RESULTS]: '📊 View Results',
-	};
-	return labels[tab];
 }
 
 export default App;

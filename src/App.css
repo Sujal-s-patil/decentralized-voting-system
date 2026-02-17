@@ -94,12 +94,19 @@ body {
 	margin-bottom: var(--spacing-sm);
 }
 
+/* ===== ADMIN BUTTON CONTAINER ===== */
+.admin-button-container {
+	position: fixed;
+	top: var(--spacing-lg);
+	right: var(--spacing-lg);
+	z-index: 1001;
+	display: flex;
+	align-items: center;
+	gap: var(--spacing-sm);
+}
+
 /* ===== THEME TOGGLE ===== */
 .theme-toggle {
-	position: fixed;
-	top: var(--spacing-xl);
-	right: var(--spacing-xl);
-	z-index: 1000;
 	background: var(--surface);
 	border: 1px solid var(--border);
 	border-radius: 50%;
@@ -112,6 +119,11 @@ body {
 	transition: var(--transition);
 	box-shadow: var(--shadow);
 	font-size: 1.25rem;
+	color: var(--text);
+}
+
+[data-theme='dark'] .theme-toggle {
+	color: #ffffff;
 }
 
 .theme-toggle:hover {
@@ -310,6 +322,38 @@ textarea {
 .btn--add {
 	margin-top: var(--spacing-sm);
 	align-self: flex-start;
+}
+
+.btn--admin {
+	background: linear-gradient(135deg, var(--accent), var(--accent-2));
+	color: #fff;
+	padding: 8px 16px;
+	font-size: 0.9rem;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.btn--admin:hover:not(:disabled) {
+	filter: brightness(1.1);
+	box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+	transform: translateY(-1px);
+}
+
+.btn--logout {
+	background: rgba(239, 68, 68, 0.9);
+	color: #fff;
+	padding: 8px 16px;
+	font-size: 0.9rem;
+	display: flex;
+	align-items: center;
+	gap: 4px;
+}
+
+.btn--logout:hover:not(:disabled) {
+	background: rgba(239, 68, 68, 1);
+	box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+	transform: translateY(-1px);
 }
 
 /* ===== OPTIONS ===== */
@@ -594,6 +638,24 @@ textarea {
 
 	.header__title {
 		font-size: 1.5rem;
+	}
+
+	.admin-button-container {
+		top: var(--spacing-sm);
+		right: var(--spacing-sm);
+		flex-direction: row;
+		gap: var(--spacing-xs);
+	}
+
+	.theme-toggle {
+		width: 40px;
+		height: 40px;
+	}
+
+	.btn--admin,
+	.btn--logout {
+		padding: 6px 12px;
+		font-size: 0.85rem;
 	}
 
 	.option-input {

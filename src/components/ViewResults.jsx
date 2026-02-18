@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getAllPolls, getPollResults } from '../utils/app';
+import { getAllPolls, getPollResults, getLiveResults } from '../utils/app';
 import { hasVotingEnded, getTimeUntilResults } from '../utils/timeUtils';
 import MessageDisplay from './common/MessageDisplay';
 import PollSelector from './common/PollSelector';
@@ -47,15 +47,31 @@ export default function ViewResults() {
 
 		// Check if voting period has ended
 		const selectedPoll = polls.find(p => p.id === parseInt(pollId));
+		
 		if (selectedPoll && !hasVotingEnded(selectedPoll.endTime)) {
-			setVotingNotEnded(true);
-			setResults(null);
+			// Voting still in progress - check if live results are enabled
+			if (selectedPoll.liveResults) {
+				// Load live results
+				try {
+					const pollResults = await getLiveResults(parseInt(pollId));
+					setResults(pollResults);
+					showMessage('Showing live results - voting is still in progress', 'info');
+				} catch (error) {
+					showMessage(`Error loading live results: ${error.message}`, 'error');
+					setResults(null);
+				}
+			} else {
+				// Live results not enabled
+				setVotingNotEnded(true);
+				setResults(null);
+				const timeMsg = getTimeUntilResults(selectedPoll.endTime);
+				showMessage(`Results will be available after voting ends (in approximately ${timeMsg})`, 'info');
+			}
 			setLoading(false);
-			const timeMsg = getTimeUntilResults(selectedPoll.endTime);
-			showMessage(`Results will be available after voting ends (in approximately ${timeMsg})`, 'info');
 			return;
 		}
 
+		// Voting has ended, load final results
 		try {
 			const pollResults = await getPollResults(parseInt(pollId));
 			setResults(pollResults);

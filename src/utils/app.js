@@ -71,6 +71,11 @@ const CONTRACT_ABI = [
 				"internalType": "uint256",
 				"name": "_durationInHours",
 				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "_liveResults",
+				"type": "bool"
 			}
 		],
 		"name": "createPoll",
@@ -123,6 +128,11 @@ const CONTRACT_ABI = [
 				"internalType": "address",
 				"name": "creator",
 				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "liveResults",
+				"type": "bool"
 			}
 		],
 		"stateMutability": "view",
@@ -137,6 +147,25 @@ const CONTRACT_ABI = [
 			}
 		],
 		"name": "getPollResults",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "",
+				"type": "uint256[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_pollId",
+				"type": "uint256"
+			}
+		],
+		"name": "getLiveResults",
 		"outputs": [
 			{
 				"internalType": "uint256[]",
@@ -367,9 +396,10 @@ export function getCurrentAccount() {
  * @param {string} question - Poll question
  * @param {Array<string>} options - Array of poll options
  * @param {number} durationInHours - Duration of voting period in hours
+ * @param {boolean} liveResults - Whether to enable live results during voting
  * @returns {Promise<string>} Poll ID
  */
-export async function createPoll(question, options, durationInHours) {
+export async function createPoll(question, options, durationInHours, liveResults = false) {
 	if (!contract || !accounts[0]) {
 		throw new Error('Web3 not initialized or no account connected');
 	}
@@ -387,7 +417,7 @@ export async function createPoll(question, options, durationInHours) {
 	}
 
 	try {
-		const result = await contract.methods.createPoll(question, options, durationInHours).send({
+		const result = await contract.methods.createPoll(question, options, durationInHours, liveResults).send({
 			from: accounts[0],
 			gas: 3000000,
 		});
@@ -421,6 +451,7 @@ export async function getAllPolls() {
 				createdAt: poll.createdAt,
 				endTime: poll.endTime,
 				isActive: poll.isActive,
+				liveResults: poll.liveResults,
 			});
 		}
 
@@ -450,6 +481,7 @@ export async function getPollDetails(pollId) {
 			createdAt: poll.createdAt,
 			endTime: poll.endTime,
 			isActive: poll.isActive,
+			liveResults: poll.liveResults,
 		};
 	} catch (error) {
 		throw new Error('Error loading poll details: ' + error.message);
@@ -533,5 +565,41 @@ export async function getPollResults(pollId) {
 		};
 	} catch (error) {
 		throw new Error('Error loading results: ' + error.message);
+	}
+}
+
+/**
+ * Get live poll results (during voting period)
+ * @param {number} pollId - Poll ID
+ * @returns {Promise<Object>} Results with options and vote counts
+ */
+export async function getLiveResults(pollId) {
+	if (!contract) {
+		throw new Error('Web3 not initialized');
+	}
+
+	try {
+		const poll = await contract.methods.getPollDetails(pollId).call();
+		const results = await contract.methods.getLiveResults(pollId).call();
+		const totalVotes = results.reduce((sum, votes) => sum + BigInt(votes), 0n);
+
+		const parsedResults = poll.options.map((option, index) => {
+			const votes = BigInt(results[index]);
+			const percentage = totalVotes > 0 ? (Number(votes) / Number(totalVotes)) * 100 : 0;
+			return {
+				option,
+				votes: Number(votes),
+				percentage: parseFloat(percentage.toFixed(2)),
+			};
+		});
+
+		return {
+			pollId,
+			question: poll.question,
+			totalVotes: Number(totalVotes),
+			results: parsedResults,
+		};
+	} catch (error) {
+		throw new Error('Error loading live results: ' + error.message);
 	}
 }

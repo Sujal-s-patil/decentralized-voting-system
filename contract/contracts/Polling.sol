@@ -17,6 +17,7 @@ contract Polling {
         uint256 createdAt;
         uint256 endTime;
         bool isActive;
+        bool liveResults;
     }
     
     mapping(uint256 => Poll) public polls;
@@ -47,9 +48,10 @@ contract Polling {
      * @param _question The poll question
      * @param _options Array of answer options
      * @param _durationInHours Voting duration in hours (max 8760 = 1 year)
+     * @param _liveResults Whether to show live results during voting
      * @return pollId The ID of the created poll
      */
-    function createPoll(string memory _question, string[] memory _options, uint256 _durationInHours) public returns (uint256) {
+    function createPoll(string memory _question, string[] memory _options, uint256 _durationInHours, bool _liveResults) public returns (uint256) {
         require(_options.length >= MIN_OPTIONS, "Poll must have at least 2 options");
         require(_options.length <= MAX_OPTIONS, "Poll cannot have more than 10 options");
         require(bytes(_question).length > 0, "Question cannot be empty");
@@ -65,6 +67,7 @@ contract Polling {
         newPoll.createdAt = block.timestamp;
         newPoll.endTime = block.timestamp + (_durationInHours * 1 hours);
         newPoll.isActive = true;
+        newPoll.liveResults = _liveResults;
         
         emit PollCreated(pollId, _question, msg.sender);
         return pollId;
@@ -95,6 +98,7 @@ contract Polling {
      * @return endTime Voting end timestamp
      * @return isActive Whether poll is active
      * @return creator Address of poll creator
+     * @return liveResults Whether live results are enabled
      */
     function getPollDetails(uint256 _pollId) public view pollExists(_pollId) returns (
         string memory question,
@@ -102,10 +106,11 @@ contract Polling {
         uint256 createdAt,
         uint256 endTime,
         bool isActive,
-        address creator
+        address creator,
+        bool liveResults
     ) {
         Poll storage poll = polls[_pollId];
-        return (poll.question, poll.options, poll.createdAt, poll.endTime, poll.isActive, poll.creator);
+        return (poll.question, poll.options, poll.createdAt, poll.endTime, poll.isActive, poll.creator, poll.liveResults);
     }
     
     /**
@@ -115,6 +120,24 @@ contract Polling {
      */
     function getPollResults(uint256 _pollId) public view pollExists(_pollId) votingEnded(_pollId) returns (uint256[] memory) {
         Poll storage poll = polls[_pollId];
+        uint256[] memory results = new uint256[](poll.options.length);
+        
+        for (uint256 i = 0; i < poll.options.length; i++) {
+            results[i] = poll.votes[i];
+        }
+        
+        return results;
+    }
+    
+    /**
+     * Get live voting results for a poll (only if live results are enabled)
+     * @param _pollId The poll ID
+     * @return results Array of vote counts for each option
+     */
+    function getLiveResults(uint256 _pollId) public view pollExists(_pollId) returns (uint256[] memory) {
+        Poll storage poll = polls[_pollId];
+        require(poll.liveResults, "Live results are not enabled for this poll");
+        
         uint256[] memory results = new uint256[](poll.options.length);
         
         for (uint256 i = 0; i < poll.options.length; i++) {

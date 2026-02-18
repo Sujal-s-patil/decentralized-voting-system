@@ -69,7 +69,7 @@ function App() {
 		window.ethereum.on('accountsChanged', (newAccounts) => {
 			setAccountInfo(
 				newAccounts.length > 0 
-					? `Connected Account: ${newAccounts[0]}` 
+					? newAccounts[0] 
 					: 'Wallet disconnected'
 			);
 		});

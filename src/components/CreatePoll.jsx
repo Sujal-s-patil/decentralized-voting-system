@@ -13,6 +13,7 @@ export default function CreatePoll() {
 	const [question, setQuestion] = useState('');
 	const [options, setOptions] = useState(['', '']);
 	const [durationInHours, setDurationInHours] = useState('');
+	const [liveResults, setLiveResults] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const { message, showMessage } = useMessage();
 
@@ -84,7 +85,7 @@ export default function CreatePoll() {
 		try {
 			const filteredOptions = options.map(o => o.trim()).filter(o => o !== '');
 			const duration = parseInt(durationInHours);
-			const pollId = await createPoll(question, filteredOptions, duration);
+			const pollId = await createPoll(question, filteredOptions, duration, liveResults);
 			
 			showMessage(`Poll created successfully! Poll ID: ${pollId}`, 'success');
 			resetForm();
@@ -102,6 +103,7 @@ export default function CreatePoll() {
 		setQuestion('');
 		setOptions(['', '']);
 		setDurationInHours('');
+		setLiveResults(false);
 	};
 
 	return (
@@ -134,6 +136,21 @@ export default function CreatePoll() {
 						required
 					/>
 					<small className="form-hint">Maximum: 8760 hours (1 year)</small>
+				</div>
+
+				<div className="form-group">
+					<label>
+						<input
+							type="checkbox"
+							checked={liveResults}
+							onChange={(e) => setLiveResults(e.target.checked)}
+						/>
+						<span style={{ marginLeft: '8px' }}>Enable Live Results</span>
+					</label>
+					<small className="form-hint">
+						If enabled, voters can see results in real-time during voting. 
+						If disabled, results will only be visible after voting ends.
+					</small>
 				</div>
 
 				<div className="form-group">

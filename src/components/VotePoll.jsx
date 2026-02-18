@@ -111,6 +111,11 @@ export default function VotePoll() {
 						<div className="poll-meta">
 							<strong>Time remaining:</strong> {formatTimeRemaining(selectedPoll.endTime)}
 						</div>
+						{selectedPoll.liveResults && (
+							<div className="message message--info" style={{ marginTop: '10px' }}>
+								Live results are enabled for this poll. You can view results in real-time in the "View Results" tab.
+							</div>
+						)}
 						<div className="poll-options">
 							{selectedPoll.options.map((option, index) => (
 								<div key={index} className="poll-option">

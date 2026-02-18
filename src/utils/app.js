@@ -66,6 +66,11 @@ const CONTRACT_ABI = [
 				"internalType": "string[]",
 				"name": "_options",
 				"type": "string[]"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_durationInHours",
+				"type": "uint256"
 			}
 		],
 		"name": "createPoll",
@@ -102,6 +107,11 @@ const CONTRACT_ABI = [
 			{
 				"internalType": "uint256",
 				"name": "createdAt",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "endTime",
 				"type": "uint256"
 			},
 			{
@@ -356,9 +366,10 @@ export function getCurrentAccount() {
  * Create a new poll
  * @param {string} question - Poll question
  * @param {Array<string>} options - Array of poll options
+ * @param {number} durationInHours - Duration of voting period in hours
  * @returns {Promise<string>} Poll ID
  */
-export async function createPoll(question, options) {
+export async function createPoll(question, options, durationInHours) {
 	if (!contract || !accounts[0]) {
 		throw new Error('Web3 not initialized or no account connected');
 	}
@@ -367,8 +378,16 @@ export async function createPoll(question, options) {
 		throw new Error('Please provide at least 2 options');
 	}
 
+	if (!durationInHours || durationInHours <= 0) {
+		throw new Error('Please provide a valid duration (greater than 0 hours)');
+	}
+
+	if (durationInHours > 8760) {
+		throw new Error('Duration cannot exceed 1 year (8760 hours)');
+	}
+
 	try {
-		const result = await contract.methods.createPoll(question, options).send({
+		const result = await contract.methods.createPoll(question, options, durationInHours).send({
 			from: accounts[0],
 			gas: 3000000,
 		});
@@ -400,6 +419,7 @@ export async function getAllPolls() {
 				options: poll.options,
 				creator: poll.creator,
 				createdAt: poll.createdAt,
+				endTime: poll.endTime,
 				isActive: poll.isActive,
 			});
 		}
@@ -428,6 +448,7 @@ export async function getPollDetails(pollId) {
 			options: poll.options,
 			creator: poll.creator,
 			createdAt: poll.createdAt,
+			endTime: poll.endTime,
 			isActive: poll.isActive,
 		};
 	} catch (error) {

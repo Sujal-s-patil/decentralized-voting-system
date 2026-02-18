@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getAllPolls, hasVoted, submitVote } from '../utils/app';
+import { hasVotingEnded, formatTimeRemaining } from '../utils/timeUtils';
 import MessageDisplay from './common/MessageDisplay';
 import PollSelector from './common/PollSelector';
 import { useMessage } from '../hooks/useMessage';
@@ -10,6 +11,7 @@ export default function VotePoll() {
 	const [selectedOption, setSelectedOption] = useState('');
 	const [loading, setLoading] = useState(false);
 	const [alreadyVoted, setAlreadyVoted] = useState(false);
+	const [votingEnded, setVotingEnded] = useState(false);
 	const { message, showMessage } = useMessage();
 
 	/**
@@ -35,8 +37,16 @@ export default function VotePoll() {
 		setSelectedPollId(pollId);
 		setSelectedOption('');
 		setAlreadyVoted(false);
+		setVotingEnded(false);
 
 		if (!pollId) return;
+
+		const selectedPoll = polls.find(p => p.id === parseInt(pollId));
+		if (selectedPoll && hasVotingEnded(selectedPoll.endTime)) {
+			setVotingEnded(true);
+			showMessage('Voting period has ended for this poll', 'info');
+			return;
+		}
 
 		try {
 			const voted = await hasVoted(parseInt(pollId));
@@ -57,6 +67,11 @@ export default function VotePoll() {
 
 		if (!selectedPollId || selectedOption === '') {
 			showMessage('Please select a poll and an option', 'error');
+			return;
+		}
+
+		if (votingEnded) {
+			showMessage('Voting period has ended for this poll', 'error');
 			return;
 		}
 
@@ -89,10 +104,13 @@ export default function VotePoll() {
 				onPollSelect={handlePollSelect}
 			/>
 
-			{selectedPoll && !alreadyVoted && (
+			{selectedPoll && !alreadyVoted && !votingEnded && (
 				<form onSubmit={handleSubmitVote} className="form">
 					<div className="poll-card">
 						<h3>{selectedPoll.question}</h3>
+						<div className="poll-meta">
+							<strong>Time remaining:</strong> {formatTimeRemaining(selectedPoll.endTime)}
+						</div>
 						<div className="poll-options">
 							{selectedPoll.options.map((option, index) => (
 								<div key={index} className="poll-option">
@@ -115,8 +133,18 @@ export default function VotePoll() {
 				</form>
 			)}
 
-			{selectedPoll && alreadyVoted && (
+			{selectedPoll && votingEnded && (
 				<div className="poll-card">
+					<h3>{selectedPoll.question}</h3>
+					<div className="message message--info">
+						Voting period has ended for this poll. Results are now available in the "View Results" tab.
+					</div>
+				</div>
+			)}
+
+			{selectedPoll && alreadyVoted && !votingEnded && (
+				<div className="poll-card">
+					<h3>{selectedPoll.question}</h3>
 					<div className="message message--info">You have already voted in this poll.</div>
 				</div>
 			)}

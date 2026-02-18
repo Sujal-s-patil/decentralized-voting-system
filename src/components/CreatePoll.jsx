@@ -3,12 +3,16 @@ import { createPoll } from '../utils/app';
 import MessageDisplay from './common/MessageDisplay';
 import { useMessage } from '../hooks/useMessage';
 
+// Constants
 const MIN_OPTIONS = 2;
 const MAX_OPTIONS = 10;
+const MAX_DURATION_HOURS = 8760; // 1 year
+const MIN_DURATION_HOURS = 1;
 
 export default function CreatePoll() {
 	const [question, setQuestion] = useState('');
 	const [options, setOptions] = useState(['', '']);
+	const [durationInHours, setDurationInHours] = useState('');
 	const [loading, setLoading] = useState(false);
 	const { message, showMessage } = useMessage();
 
@@ -52,6 +56,17 @@ export default function CreatePoll() {
 			return false;
 		}
 
+		const duration = parseInt(durationInHours);
+		if (!durationInHours || isNaN(duration) || duration < MIN_DURATION_HOURS) {
+			showMessage(`Please enter a valid duration (at least ${MIN_DURATION_HOURS} hour)`, 'error');
+			return false;
+		}
+
+		if (duration > MAX_DURATION_HOURS) {
+			showMessage(`Duration cannot exceed ${MAX_DURATION_HOURS} hours (1 year)`, 'error');
+			return false;
+		}
+
 		return true;
 	};
 
@@ -68,7 +83,8 @@ export default function CreatePoll() {
 
 		try {
 			const filteredOptions = options.map(o => o.trim()).filter(o => o !== '');
-			const pollId = await createPoll(question, filteredOptions);
+			const duration = parseInt(durationInHours);
+			const pollId = await createPoll(question, filteredOptions, duration);
 			
 			showMessage(`Poll created successfully! Poll ID: ${pollId}`, 'success');
 			resetForm();
@@ -85,6 +101,7 @@ export default function CreatePoll() {
 	const resetForm = () => {
 		setQuestion('');
 		setOptions(['', '']);
+		setDurationInHours('');
 	};
 
 	return (
@@ -102,6 +119,21 @@ export default function CreatePoll() {
 						onChange={(e) => setQuestion(e.target.value)}
 						required
 					/>
+				</div>
+
+				<div className="form-group">
+					<label htmlFor="duration">Voting Duration (in hours):</label>
+					<input
+						type="number"
+						id="duration"
+						placeholder="e.g., 24 for 1 day, 168 for 1 week"
+						value={durationInHours}
+						onChange={(e) => setDurationInHours(e.target.value)}
+						min="1"
+						max="8760"
+						required
+					/>
+					<small className="form-hint">Maximum: 8760 hours (1 year)</small>
 				</div>
 
 				<div className="form-group">

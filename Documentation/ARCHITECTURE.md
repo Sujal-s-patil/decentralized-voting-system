@@ -68,369 +68,178 @@ This document provides a comprehensive architectural overview of the Blockchain 
 - ✅ Gas-optimized smart contract operations
 
 ---
+# System Architecture
 
-## System Overview
+Last updated: 2026-03-06
 
-### High-Level Context Diagram
+## High-Level Architecture
 
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                          EXTERNAL ACTORS                            │
-│                                                                     │
-│  ┌──────────┐      ┌──────────┐      ┌──────────┐                 │
-│  │  Voter   │      │ Poll     │      │ Results  │                 │
-│  │  User    │      │ Creator  │      │ Viewer   │                 │
-│  └────┬─────┘      └────┬─────┘      └────┬─────┘                 │
-└───────┼──────────────────┼──────────────────┼───────────────────────┘
-        │                  │                  │
-        │                  ▼                  │
-        │    ┌─────────────────────────────┐  │
-        │    │   Browser (Chrome/Firefox)  │  │
-        │    │   - MetaMask Extension      │  │
-        │    │   - Web3 Provider           │  │
-        │    └──────────────┬──────────────┘  │
-        │                   │                  │
-        └───────────────────┼──────────────────┘
-                            │
-        ┌───────────────────┴───────────────────┐
-        │                                       │
-        ▼                                       ▼
-┌──────────────────────┐           ┌───────────────────────┐
-│  PRESENTATION TIER   │           │  BLOCKCHAIN TIER      │
-│  (React Frontend)    │◄─────────►│  (Ethereum Network)   │
-│                      │  Web3.js  │                       │
-│  - UI Components     │           │  - Smart Contracts    │
-│  - State Management  │           │  - Consensus Layer    │
-│  - Business Logic    │           │  - Storage Layer      │
-└──────────────────────┘           └───────────────────────┘
+The implementation follows a frontend + wallet + smart-contract model (no standalone backend service).
+
+```mermaid
+flowchart LR
+    U[User] --> FE[React Frontend<br/>src/components]
+    FE --> SVC[Web3 Service Layer<br/>src/utils/app.js]
+    SVC --> MM[MetaMask Provider<br/>window.ethereum]
+    MM --> RPC[Ganache JSON-RPC<br/>127.0.0.1:7545]
+    RPC --> SC[Polling Smart Contract<br/>contract/contracts/Polling.sol]
 ```
 
-### Deployment Topology
+### Layer responsibilities
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    PRODUCTION ENVIRONMENT                    │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌──────────────────┐         ┌──────────────────┐         │
-│  │  CDN / Hosting   │         │  Ethereum        │         │
-│  │  (Vercel/Netlify)│         │  Mainnet         │         │
-│  │                  │         │                  │         │
-│  │  - Static Assets │         │  - Smart         │         │
-│  │  - React Bundle  │         │    Contracts     │         │
-│  │  - HTTPS/SSL     │         │  - Distributed   │         │
-│  └────────┬─────────┘         │    Nodes         │         │
-│           │                   └────────┬─────────┘         │
-│           │                            │                   │
-│           └────────────┬───────────────┘                   │
-│                        │                                   │
-│                        ▼                                   │
-│              ┌──────────────────┐                          │
-│              │   End Users      │                          │
-│              │   (Browsers)     │                          │
-│              └──────────────────┘                          │
-└─────────────────────────────────────────────────────────────┘
+1. **Frontend layer** (`src/App.jsx`, `src/components/*`)
+   - Renders Create/Vote/Results/Admin flows.
+   - Tracks UI state (selected poll, options, loading, messages, theme).
 
-┌─────────────────────────────────────────────────────────────┐
-│                  DEVELOPMENT ENVIRONMENT                     │
-├─────────────────────────────────────────────────────────────┤
-│                                                             │
-│  ┌──────────────────┐         ┌──────────────────┐         │
-│  │  Local Dev       │         │  Ganache         │         │
-│  │  Server (Vite)   │         │  Local Chain     │         │
-│  │  localhost:5173  │         │  127.0.0.1:7545  │         │
-│  └──────────────────┘         └──────────────────┘         │
-└─────────────────────────────────────────────────────────────┘
-```
+2. **Service/integration layer** (`src/utils/app.js`)
+   - Initializes Web3 and contract instance.
+   - Handles account/chain listeners.
+   - Wraps contract methods for all UI operations.
+   - Transforms raw result arrays into chart-friendly data.
 
----
+3. **Blockchain layer** (`Polling.sol`)
+   - Stores poll state and votes.
+   - Enforces rules (option limits, one vote/address, end time).
+   - Exposes read and write functions.
 
-## Architecture Principles
+## Frontend ↔ Contract Interaction
 
-### SOLID Principles Application
+### Contract methods used by frontend
+- Write transactions:
+  - `createPoll(_question, _options, _durationInHours, _liveResults)`
+  - `vote(_pollId, _optionIndex)`
+- Read calls:
+  - `pollCount()`
+  - `getPollDetails(_pollId)`
+  - `hasVoted(_pollId, _voter)`
+  - `getPollResults(_pollId)`
+  - `getLiveResults(_pollId)`
 
-1. **Single Responsibility Principle (SRP)**
-   - Each component has one clear purpose
-   - Separation of concerns: UI, business logic, blockchain interaction
-   - Example: `CreatePoll.jsx` only handles poll creation, not voting
+### Event usage
+- `PollCreated` is consumed from transaction receipt after poll creation.
+- `Voted` is emitted on vote transaction (not currently subscribed live in UI).
 
-2. **Open/Closed Principle (OCP)**
-   - Components extensible without modification
-   - Tab system allows adding new features without changing existing code
-   - Custom hooks enable behavior extension
+## Data Flow
 
-3. **Liskov Substitution Principle (LSP)**
-   - Reusable components (`MessageDisplay`, `PollSelector`) work across contexts
-   - Consistent prop interfaces allow component swapping
+### 1) Poll creation data flow
 
-4. **Interface Segregation Principle (ISP)**
-   - Components receive only props they need
-   - No fat interfaces with unused properties
-   - Example: `Header` only receives `accountInfo`, `theme`, `onThemeToggle`
+```mermaid
+sequenceDiagram
+    actor Admin
+    participant UI as CreatePoll.jsx
+    participant AppSvc as app.js
+    participant Wallet as MetaMask
+    participant Contract as Polling.sol
 
-5. **Dependency Inversion Principle (DIP)**
-   - High-level components depend on abstractions (utils/app.js)
-   - Web3 integration abstracted from UI components
-   - Contract ABI separated from business logic
-
-### Additional Design Principles
-
-- **DRY (Don't Repeat Yourself)**: Reusable components, custom hooks, utility functions
-- **KISS (Keep It Simple)**: Clear component hierarchy, straightforward data flow
-- **YAGNI (You Aren't Gonna Need It)**: Only implement required features
-- **Separation of Concerns**: Clear boundaries between UI, logic, and blockchain layers
-- **Convention over Configuration**: Standard React patterns, minimal configuration
-- **Progressive Enhancement**: Core functionality works, enhanced with MetaMask
-
----
-
-## Technology Stack
-
-### Frontend Technology Matrix
-
-| Layer | Technology | Version | Purpose | Justification |
-|-------|-----------|---------|---------|---------------|
-| **Core Framework** | React | 19.2.0 | UI rendering & component model | Industry standard, virtual DOM, hooks API, large ecosystem |
-| **DOM Renderer** | React DOM | 19.2.0 | Browser DOM manipulation | Official React renderer for web |
-| **UI Component Library** | Material-UI (MUI) | 7.3.7 | Pre-built UI components | Enterprise-ready, accessible, customizable, icons included |
-| **Styling Engine** | Emotion | 11.14.0 | CSS-in-JS | MUI dependency, dynamic styling, theme support |
-| **Build Tool** | Vite | 7.2.4 | Development & build | Fast HMR, ES modules, optimized production builds |
-| **Code Quality** | ESLint | 9.39.1 | Code linting | Enforce standards, catch errors, maintain consistency |
-| **Language** | JavaScript ES6+ | - | Programming language | Native browser support, async/await, modern features |
-
-### Blockchain Technology Matrix
-
-| Layer | Technology | Version | Purpose | Justification |
-|-------|-----------|---------|---------|---------------|
-| **Blockchain Platform** | Ethereum | - | Decentralized ledger | Established network, smart contract support, large developer community |
-| **Smart Contract Language** | Solidity | 0.8.19 | Contract development | Industry standard, type-safe, comprehensive documentation |
-| **Web3 Library** | Web3.js | 4.16.0 | Blockchain interaction | Most mature library, MetaMask integration, comprehensive API |
-| **Development Framework** | Truffle | 5.11.5 | Contract development | Testing framework, migration system, debugging tools |
-| **Local Blockchain** | Ganache | 7.9.2 | Development/testing | Fast transactions, predictable state, no real ETH needed |
-| **Wallet** | MetaMask | Latest | User authentication & signing | Most popular wallet, browser integration, standard interface |
-
-### Development Tools Matrix
-
-| Category | Tool | Purpose |
-|----------|------|---------|
-| **Runtime** | Node.js 16+ | JavaScript execution environment |
-| **Package Manager** | npm | Dependency management |
-| **Version Control** | Git | Source code management |
-| **Code Editor** | VS Code (recommended) | Development environment |
-| **Browser DevTools** | Chrome/Firefox DevTools | Debugging, performance analysis |
-| **MetaMask Developer Mode** | MetaMask | Test account management, transaction inspection |
-
----
-
-## System Architecture
-
-### Layered Architecture Overview
-
-```
-┌─────────────────────────────────────────────────────────────────────┐
-│                    PRESENTATION LAYER (React)                       │
-│  Responsibilities: UI Rendering, User Interaction, State Management │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐       │
-│  │  App.jsx       │  │  Components/   │  │  Common/       │       │
-│  │  - Router      │  │  - CreatePoll  │  │  - Message     │       │
-│  │  - Global State│  │  - VotePoll    │  │  - Selector    │       │
-│  │  - Theme       │  │  - ViewResults │  │  - Chart       │       │
-│  └────────────────┘  └────────────────┘  └────────────────┘       │
-│                                                                     │
-│  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐       │
-│  │  Hooks/        │  │  Constants/    │  │  Assets/       │       │
-│  │  - useMessage  │  │  - tabs.js     │  │  - Styles      │       │
-│  └────────────────┘  └────────────────┘  └────────────────┘       │
-└─────────────────────────────────────────────────────────────────────┘
-                              ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                  BUSINESS LOGIC LAYER (Utils)                       │
-│  Responsibilities: Web3 Integration, Business Rules, Validation     │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌─────────────────────────────────────────────────────────────┐   │
-│  │  utils/app.js                                               │   │
-│  │  - initWeb3()          : Initialize Web3 provider           │   │
-│  │  - createPoll()        : Poll creation with validation      │   │
-│  │  - vote()              : Vote submission logic              │   │
-│  │  - getPollDetails()    : Fetch poll metadata                │   │
-│  │  - getPollResults()    : Fetch vote counts                  │   │
-│  │  - hasUserVoted()      : Check voting status                │   │
-│  │  - getAllPolls()       : Fetch all polls                    │   │
-│  │  - getAccounts()       : Get connected accounts             │   │
-│  │  - switchNetwork()     : Network switching logic            │   │
-│  └─────────────────────────────────────────────────────────────┘   │
-│                                                                     │
-│  Configuration:                                                     │
-│  - CONTRACT_ABI        : Smart contract interface definition       │
-│  - CONTRACT_ADDRESS    : Deployed contract address                 │
-│  - GANACHE_CHAIN_IDS   : Supported network identifiers             │
-└─────────────────────────────────────────────────────────────────────┘
-                              ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                  WEB3 INTEGRATION LAYER                             │
-│  Responsibilities: Provider Management, Transaction Handling        │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │  Web3.js Provider                                            │  │
-│  │  - HttpProvider / WebsocketProvider                          │  │
-│  │  - Account management (eth.accounts)                         │  │
-│  │  - Transaction signing (eth.sendTransaction)                 │  │
-│  │  - Contract interaction (eth.Contract)                       │  │
-│  │  - Event listening (contract.events)                         │  │
-│  │  - Gas estimation (eth.estimateGas)                          │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────────┘
-                              ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                    WALLET LAYER (MetaMask)                          │
-│  Responsibilities: Key Management, Transaction Signing, Auth        │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  - Private key management (user never exposes keys)                 │
-│  - Transaction approval UI                                          │
-│  - Account switching (accountsChanged event)                        │
-│  - Network switching (chainChanged event)                           │
-│  - Gas price recommendations                                        │
-│  - Transaction history                                              │
-└─────────────────────────────────────────────────────────────────────┘
-                              ▼
-┌─────────────────────────────────────────────────────────────────────┐
-│                BLOCKCHAIN LAYER (Ethereum Network)                  │
-│  Responsibilities: Consensus, Immutable Storage, Execution          │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │  Polling Smart Contract (Polling.sol)                        │  │
-│  │                                                               │  │
-│  │  State Variables:                                             │  │
-│  │  - mapping(uint256 => Poll) polls                            │  │
-│  │  - uint256 pollCount                                         │  │
-│  │                                                               │  │
-│  │  Functions:                                                   │  │
-│  │  - createPoll(question, options) → pollId                    │  │
-│  │  - vote(pollId, optionIndex) → void                          │  │
-│  │  - getPollDetails(pollId) → (question, options, ...)         │  │
-│  │  - getPollResults(pollId) → uint256[]                        │  │
-│  │  - hasVoted(pollId, voter) → bool                            │  │
-│  │                                                               │  │
-│  │  Events:                                                      │  │
-│  │  - PollCreated(pollId, question, creator)                    │  │
-│  │  - Voted(pollId, optionIndex, voter)                         │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-│                                                                     │
-│  Blockchain Infrastructure:                                         │
-│  - Consensus Mechanism: Proof of Stake (Post-Merge Ethereum)       │
-│  - Block Time: ~12 seconds                                         │
-│  - Transaction Finality: ~15 minutes (2 epochs)                    │
-│  - Gas Model: EIP-1559 (Base Fee + Priority Fee)                   │
-└─────────────────────────────────────────────────────────────────────┘
+    Admin->>UI: Enter question/options/duration/live flag
+    UI->>UI: Validate inputs (2-10 options, valid duration)
+    UI->>AppSvc: createPoll(...)
+    AppSvc->>Wallet: Send createPoll transaction
+    Wallet->>Contract: createPoll
+    Contract->>Contract: Validate + persist Poll
+    Contract-->>Wallet: Tx receipt + PollCreated event
+    Wallet-->>AppSvc: Receipt
+    AppSvc-->>UI: pollId
+    UI-->>Admin: Success toast
 ```
 
-### Data Flow Architecture
+### 2) Vote data flow
 
+```mermaid
+sequenceDiagram
+    actor Voter
+    participant UI as VotePoll.jsx
+    participant Time as timeUtils.js
+    participant AppSvc as app.js
+    participant Contract as Polling.sol
+
+    Voter->>UI: Select poll
+    UI->>Time: hasVotingEnded(endTime)
+    UI->>AppSvc: hasVoted(pollId)
+    AppSvc->>Contract: hasVoted call
+    Contract-->>AppSvc: bool
+    AppSvc-->>UI: eligibility
+
+    alt eligible and active
+        Voter->>UI: Submit vote
+        UI->>AppSvc: submitVote(pollId, optionIndex)
+        AppSvc->>Contract: vote transaction
+        Contract->>Contract: validate + increment votes + mark hasVoted
+        Contract-->>AppSvc: receipt
+        AppSvc-->>UI: success
+    else blocked
+        UI-->>Voter: already voted or voting ended message
+    end
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                        USER ACTIONS                               │
-│  (Click, Type, Submit, Select)                                   │
-└──────────────────┬───────────────────────────────────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                   REACT EVENT HANDLERS                            │
-│  - handleSubmit()                                                 │
-│  - handlePollSelect()                                             │
-│  - handleOptionChange()                                           │
-│  - handleThemeToggle()                                            │
-└──────────────────┬───────────────────────────────────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                  CLIENT-SIDE VALIDATION                           │
-│  - Form validation (required fields, length constraints)          │
-│  - Data type checking                                             │
-│  - Business rule validation (2-10 options, non-empty question)    │
-└──────────────────┬───────────────────────────────────────────────┘
-                   │
-                   ├─ [Validation Failed] ─┐
-                   │                        │
-                   ▼                        ▼
-        [Validation Passed]        ┌────────────────┐
-                   │               │ Show Error     │
-                   │               │ Message to User│
-                   │               └────────────────┘
-                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│              UTILS/APP.JS FUNCTION CALLS                          │
-│  - createPoll(question, options)                                  │
-│  - vote(pollId, optionIndex)                                      │
-│  - getPollResults(pollId)                                         │
-│  - hasUserVoted(pollId, account)                                  │
-└──────────────────┬───────────────────────────────────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                 WEB3.JS CONTRACT INTERACTION                      │
-│  - contract.methods.createPoll(q, o).send({from: account})       │
-│  - contract.methods.vote(p, i).send({from: account})             │
-│  - contract.methods.getPollResults(p).call()                      │
-│  - contract.methods.hasVoted(p, a).call()                         │
-└──────────────────┬───────────────────────────────────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                   METAMASK CONFIRMATION                           │
-│  - Display transaction details                                    │
-│  - Show gas estimate                                              │
-│  - Request user signature                                         │
-│  - [User Approves/Rejects]                                        │
-└──────────────────┬───────────────────────────────────────────────┘
-                   │
-                   ├─ [User Rejected] ─────┐
-                   │                        │
-                   ▼                        ▼
-          [User Approved]          ┌────────────────┐
-                   │               │ Transaction    │
-                   │               │ Cancelled      │
-                   │               └────────────────┘
-                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                 TRANSACTION BROADCAST                             │
-│  - Transaction sent to Ethereum network                           │
-│  - Pending in mempool                                             │
-│  - Miners/Validators include in block                             │
-└──────────────────┬───────────────────────────────────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│              SMART CONTRACT EXECUTION                             │
-│  - EVM processes bytecode                                         │
-│  - State changes applied (votes recorded, poll created)           │
-│  - Events emitted                                                 │
-│  - Gas consumed                                                   │
-└──────────────────┬───────────────────────────────────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                 TRANSACTION RECEIPT                               │
-│  - Status: Success/Failure                                        │
-│  - Gas used                                                       │
-│  - Transaction hash                                               │
-│  - Event logs                                                     │
-└──────────────────┬───────────────────────────────────────────────┘
-                   │
-                   ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                  RESPONSE HANDLING                                │
-│  - Parse transaction receipt                                      │
-│  - Extract relevant data                                          │
-│  - Format for display                                             │
-└──────────────────┬───────────────────────────────────────────────┘
-                   │
-                   ▼
+
+### 3) Results data flow
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant UI as ViewResults.jsx
+    participant Time as timeUtils.js
+    participant AppSvc as app.js
+    participant Contract as Polling.sol
+
+    User->>UI: Select poll in results tab
+    UI->>Time: hasVotingEnded(endTime)
+
+    alt voting active and liveResults = true
+        UI->>AppSvc: getLiveResults(pollId)
+        AppSvc->>Contract: getLiveResults call
+        Contract-->>AppSvc: counts[]
+    else voting ended
+        UI->>AppSvc: getPollResults(pollId)
+        AppSvc->>Contract: getPollResults call
+        Contract-->>AppSvc: counts[]
+    else voting active and liveResults = false
+        UI-->>User: results unavailable message
+    end
+
+    AppSvc->>AppSvc: compute totalVotes + percentages
+    AppSvc-->>UI: formatted result payload
+    UI-->>User: ResultsChart render
+```
+
+## Module Interaction Map
+
+```mermaid
+flowchart TD
+    App[App.jsx] --> Header[Header.jsx]
+    App --> Admin[AdminLogin.jsx]
+    App --> Create[CreatePoll.jsx]
+    App --> Vote[VotePoll.jsx]
+    App --> Results[ViewResults.jsx]
+
+    Create --> Web3Svc[utils/app.js]
+    Vote --> Web3Svc
+    Vote --> Time[utils/timeUtils.js]
+    Results --> Web3Svc
+    Results --> Time
+
+    Create --> MsgHook[hooks/useMessage.js]
+    Vote --> MsgHook
+    Results --> MsgHook
+    Admin --> MsgHook
+
+    Vote --> PollSel[common/PollSelector.jsx]
+    Results --> PollSel
+    Results --> Chart[common/ResultsChart.jsx]
+    App --> Toast[common/MessageDisplay.jsx]
+```
+
+## Configuration and Runtime Dependencies
+
+- `VITE_CONTRACT_ADDRESS` must point to deployed `Polling` contract.
+- `app.js` expects Ganache chain id `0x539` and RPC `http://127.0.0.1:7545` for chain add/switch.
+- `truffle-config.js` currently sets development port `8545`.
+
+## Architecture Notes / Constraints
+
+- The dApp has no HTTP API and no off-chain persistence.
+- Poll list loading (`getAllPolls`) is sequential and can become slower with high poll counts.
+- Admin gating is client-side only and does not restrict contract-level `createPoll` calls.
 ┌──────────────────────────────────────────────────────────────────┐
 │                   STATE UPDATE                                    │
 │  - Update React component state                                   │

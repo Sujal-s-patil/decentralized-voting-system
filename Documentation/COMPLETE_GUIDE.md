@@ -78,336 +78,171 @@ This system enables:
 ### Key Advantages
 
 - **Immutable records**: Once recorded on-chain, votes cannot be altered
-- **Cryptographic security**: Transactions are signed and verifiable
-- **Decentralized**: No single point of failure or control
-- **Transparent**: Results are publicly verifiable
-- **Automated**: Smart contracts execute rules without intermediaries
-- **Scalable**: Supports any number of polls and voters
-- **Audit trail**: Complete on-chain history
-- **User‑friendly**: Web interface accessible to non‑technical users
+# Complete Guide (Setup, Run, and Developer Operations)
 
----
+Last updated: 2026-03-06
 
-## Key Features
+This guide documents how to run and work on the current codebase.
 
-### Core Features
+## 1) Prerequisites
 
-1. **Create Polls**
-   - Anyone can create a new poll
-   - Define poll question and options
-   - Supports 2-10 options per poll
-   - Automatic validation
+- Node.js (16+)
+- npm
+- MetaMask browser extension
+- Ganache (CLI or desktop)
 
-2. **Cast Votes**
-   - Select any active poll
-   - Choose one option per poll
-   - One vote per Ethereum address (enforced)
-   - Instant confirmation on blockchain
-
-3. **View Results**
-   - Real-time vote counts
-   - Percentage calculations
-   - Visual charts and graphs
-   - Live updates as votes come in
-
-4. **Security Features**
-   - MetaMask wallet integration
-   - Double-vote prevention
-   - Gas estimation before transactions
-   - Error handling and recovery
-
-### Technical Features
-
-- **Responsive Design**: Mobile-first, works on all devices
-- **Error Handling**: Comprehensive error messages and recovery
-- **State Management**: Efficient React state with hooks
-- **Performance**: Optimized component rendering
-- **Accessibility**: Web3.js integration with MetaMask
-- **Documentation**: Inline code comments and guides
-
----
-
-## Technology Stack
-
-### Frontend
-
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| **React** | 19.2.0 | UI framework and component management |
-| **React DOM** | 19.2.0 | DOM rendering for React |
-| **Material-UI (MUI)** | 7.3.7 | UI component library and icons |
-| **Emotion** | 11.14.0 | CSS-in-JS styling (MUI dependency) |
-| **Vite** | 7.2.4 | Modern build tool and dev server |
-| **JavaScript (ES6+)** | - | Core programming language |
-| **CSS3** | - | Styling with CSS variables and themes |
-
-### Blockchain & Web3
-
-| Technology | Version | Purpose |
-|-----------|---------|---------|
-| **Web3.js** | 4.16.0 | Interact with Ethereum blockchain |
-| **Solidity** | 0.8.19 | Smart contract language |
-| **Truffle** | 5.11.5 | Smart contract development framework |
-| **Ganache** | 7.9.2 | Local Ethereum blockchain for testing |
-
-### Development Tools
-
-| Tool | Version | Purpose |
-|------|---------|---------|
-| **Node.js** | 16+ | JavaScript runtime |
-| **npm** | Latest | Package manager |
-| **Babel** | Latest | JavaScript transpiler |
-| **ESLint** | 9.39.1 | Code quality and style |
-| **MetaMask** | Latest | Wallet and Web3 provider |
-
----
-
-## System Architecture
-
-### High-Level Architecture Diagram
-
-```
-┌────────────────────────────────────────────────────────────────┐
-│                    USER INTERFACE (React 19.2)                 │
-│                                                                │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐          │
-│  │ CreatePoll   │  │  VotePoll    │  │ ViewResults  │          │
-│  │ Component    │  │  Component   │  │ Component    │          │
-│  └──────────────┘  └──────────────┘  └──────────────┘          │
-│                                                                │
-│  Material-UI Components (Icons, Styling)                       │
-│  Custom Hooks (useMessage)                                     │
-│  Reusable Components (MessageDisplay, PollSelector, Chart)     │
-└────────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌────────────────────────────────────────────────────────────────┐
-│              WEB3.JS INTEGRATION (src/utils/app.js)            │
-│                                                                │
-│  • initWeb3() - Initialize provider                            │
-│  • createPoll() - Create new poll transaction                  │
-│  • vote() - Cast vote transaction                              │
-│  • getPollDetails() - Fetch poll data                          │
-│  • getPollResults() - Fetch vote counts                        │
-│  • hasUserVoted() - Check vote status                          │
-│  • Contract ABI + Address management                           │
-└────────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌────────────────────────────────────────────────────────────────┐
-│              METAMASK WALLET (Browser Extension)               │
-│                                                                │
-│  • Account management and switching                            │
-│  • Transaction signing and approval                            │
-│  • Network management (Ganache: Chain ID 0x539/1337)           │
-│  • Gas estimation and payment                                  │
-└────────────────────────────────────────────────────────────────┘
-                            │
-                            ▼
-┌────────────────────────────────────────────────────────────────┐
-│         ETHEREUM BLOCKCHAIN (Ganache Local Network)            │
-│                      127.0.0.1:7545                            │
-│                                                                │
-│  ┌──────────────────────────────────────────────────────────┐  │
-│  │         POLLING SMART CONTRACT (Solidity 0.8.19)         │  │
-│  │                                                          │  │
-│  │  State Variables:                                        │  │
-│  │  • polls: mapping(uint256 => Poll)                      │  │
-│  │  • pollCount: uint256 (counter)                         │  │
-│  │                                                          │  │
-│  │  Functions:                                              │  │
-│  │  • createPoll(question, options) → pollId               │  │
-│  │  • vote(pollId, optionIndex)                            │  │
-│  │  • getPollDetails(pollId) → poll data                   │  │
-│  │  • getPollResults(pollId) → vote counts                 │  │
-│  │  • hasVoted(pollId, voter) → boolean                    │  │
-│  │                                                          │  │
-│  │  Events:                                                 │  │
-│  │  • PollCreated(pollId, question, creator)               │  │
-│  │  • Voted(pollId, optionIndex, voter)                    │  │
-│  └──────────────────────────────────────────────────────────┘  │
-└────────────────────────────────────────────────────────────────┘
-```
-
-### Data Flow Diagram
-
-```
-CREATE POLL:
-  User Input (Question + Options)
-         │
-         ▼
-  React Component State
-         │
-         ▼
-  Form Validation
-         │
-         ▼
-  Web3.js Contract Call (createPoll)
-         │
-         ▼
-  MetaMask Signature Request
-         │
-         ▼
-  Transaction to Blockchain
-         │
-         ▼
-  Smart Contract Execution
-         │
-         ▼
-  Event Emission (PollCreated)
-         │
-         ▼
-  UI Update with Status Message
-
-VOTE IN POLL:
-  User Selection (Poll + Option)
-         │
-         ▼
-  Check Previous Vote Status
-         │
-         ▼
-  React Component State
-         │
-         ▼
-  Web3.js Contract Call (vote)
-         │
-         ▼
-  MetaMask Signature Request
-         │
-         ▼
-  Transaction to Blockchain
-         │
-         ▼
-  Smart Contract Execution
-         │
-         ▼
-  Event Emission (Voted)
-         │
-         ▼
-  UI Update with Status Message
-
-VIEW RESULTS:
-  User Selection (Poll)
-         │
-         ▼
-  Web3.js Contract Call (getPollResults)
-         │
-         ▼
-  Get Data from Blockchain
-         │
-         ▼
-  Calculate Percentages
-         │
-         ▼
-  Display with Chart Component
-         │
-         ▼
-  Real-time Updates
-```
-
-### Component Hierarchy
-
-```
-App (Main Component)
-├── Header
-│   ├── Title
-│   ├── Account Info
-│   └── Theme Toggle (Light/Dark)
-│
-├── MessageDisplay (Global)
-│   └── Toast notifications (top-right placement)
-│
-├── Tab Navigation
-│   ├── Create Poll Tab (with EditNoteIcon)
-│   ├── Vote in Poll Tab (with HowToVoteIcon)
-│   └── View Results Tab (with BarChartIcon)
-│
-├── CreatePoll Component
-│   ├── Question Input Field
-│   ├── Dynamic Options List (2-10 options)
-│   ├── Add Option Button
-│   ├── Remove Option Buttons
-│   ├── Form Validation
-│   ├── MessageDisplay (local)
-│   └── Submit Button with Loading State
-│
-├── VotePoll Component
-│   ├── PollSelector Dropdown
-│   ├── hasUserVoted Check
-│   ├── Options Radio Group
-│   ├── Vote Status Display
-│   ├── MessageDisplay (local)
-│   └── Submit Vote Button with Loading State
-│
-└── ViewResults Component
-    ├── PollSelector Dropdown
-    ├── ResultsChart Component
-    │   ├── Bar Chart Visualization
-    │   ├── Percentage Calculations
-    │   └── Vote Counts Display
-    ├── Total Votes Counter
-    ├── MessageDisplay (local)
-    └── Auto-refresh on Poll Change
-
-Shared Components (src/components/common/):
-├── MessageDisplay.jsx - Status/error messages
-├── PollSelector.jsx - Poll dropdown selector
-└── ResultsChart.jsx - Visual results display
-
-Custom Hooks (src/hooks/):
-└── useMessage.js - Message state management
-
-Constants (src/constants/):
-└── tabs.js - Tab definitions and icons
-
-Utilities (src/utils/):
-└── app.js - Web3 integration functions
-```
-
----
-
-## Prerequisites & Requirements
-
-### System Requirements
-
-- **Operating System**: Windows, macOS, or Linux
-- **RAM**: Minimum 4GB (8GB recommended)
-- **Disk Space**: 2GB minimum for dependencies
-- **Internet**: Required for blockchain interaction
-
-### Software Requirements
-
-| Software | Version | Why Needed |
-|----------|---------|-----------|
-| **Node.js** | 16.0.0 or higher | JavaScript runtime |
-| **npm** | 7.0.0 or higher | Package manager |
-| **Git** | 2.0.0 or higher | Version control (optional) |
-| **Browser** | Chrome/Firefox/Edge (latest) | Web interface |
-
-### Browser Extensions & Tools
-
-| Tool | Purpose | Installation |
-|------|---------|--------------|
-| **MetaMask** | Ethereum wallet & provider | Chrome Web Store |
-| **Developer Tools** | Debugging (optional) | Built into browser |
-
-### Blockchain Setup
-
-- **Ganache**: Local Ethereum blockchain (installed via npm)
-- **Truffle**: Smart contract development (installed via npm)
-
----
-
-## Quick Start Guide
-
-### First‑Time Setup (5 minutes)
+Quick checks:
 
 ```bash
-# Step 1: Install dependencies
-npm install
+node -v
+npm -v
+```
 
-# Step 2: Start Ganache (local blockchain)
+## 2) Installation
+
+```bash
+npm install
+```
+
+Installed dependencies include React, Vite, Web3, Truffle, Ganache, and lint tooling.
+
+## 3) Local Setup
+
+### Option A: Step-by-step (recommended)
+
+1. Start local chain (Ganache):
+
+```bash
 npx ganache
+```
+
+2. Compile contract:
+
+```bash
+npm run compile
+```
+
+3. Deploy contract:
+
+```bash
+npm run migrate
+```
+
+4. Write frontend env file:
+
+```bash
+node scripts/extractAddress.js
+```
+
+5. Start frontend:
+
+```bash
+npm run dev
+```
+
+### Option B: One command
+
+```bash
+npm run setup
+```
+
+`setup.sh` runs compile → migrate --reset → extract address → dev server.
+
+## 4) Environment Variables
+
+Required `.env` entry:
+
+```env
+VITE_CONTRACT_ADDRESS=0xYourPollingContractAddress
+```
+
+Notes:
+- `.env` is git-ignored.
+- `scripts/extractAddress.js` writes this automatically based on latest Truffle artifact network deployment.
+
+## 5) MetaMask and Network Configuration
+
+Current frontend network assumptions in `src/utils/app.js`:
+- accepted chain id: `0x539` (1337)
+- RPC used for add/switch: `http://127.0.0.1:7545`
+
+Current Truffle development network in `contract/truffle-config.js`:
+- host: `127.0.0.1`
+- port: `8545`
+
+If your Ganache instance uses a different port/chain id, align Ganache/Truffle/MetaMask/frontend settings so they target the same network.
+
+## 6) Running the Application
+
+With Ganache and frontend running, open the Vite URL shown in terminal (usually `http://localhost:5173`).
+
+On first load:
+- MetaMask account access is requested.
+- Contract code existence is checked at `VITE_CONTRACT_ADDRESS`.
+
+## 7) User Workflows
+
+### Admin login
+- Click `Admin` in top-right.
+- Current credentials: `admin` / `admin123`.
+- Successful login stores `isAdmin=true` in `sessionStorage`.
+
+### Create poll
+- Available in admin mode.
+- Enter question, 2–10 options, duration (1–8760 hours), optional live-results toggle.
+- Confirm transaction in MetaMask.
+
+### Vote
+- Select poll, choose one option, submit transaction.
+- Prevented if already voted or voting period has ended.
+
+### View results
+- If poll ended: final results.
+- If poll active + live enabled: live results.
+- If poll active + live disabled: informative waiting message.
+
+## 8) Developer Commands
+
+```bash
+npm run dev      # start Vite dev server
+npm run build    # production build
+npm run preview  # preview production build
+npm run lint     # lint JS/JSX
+
+npm run compile  # truffle compile
+npm run migrate  # truffle migrate
+npm run reset    # truffle migrate --reset
+npm run setup    # full setup script
+```
+
+## 9) API and Data Model References
+
+- Smart contract API + frontend service surface: [API_REFERENCE.md](./API_REFERENCE.md)
+- System architecture and sequence diagrams: [ARCHITECTURE.md](./ARCHITECTURE.md)
+
+## 10) Troubleshooting
+
+### MetaMask not detected
+- Ensure extension is installed/enabled in browser.
+
+### `VITE_CONTRACT_ADDRESS` not configured
+- Re-run `npm run migrate` then `node scripts/extractAddress.js`.
+
+### Contract not found on current network
+- Verify MetaMask is connected to same chain where contract was deployed.
+
+### Transactions fail for voting
+- Likely causes: already voted, voting ended, invalid option index.
+
+### Setup interrupted (`Exit Code: 130`)
+- Exit code 130 indicates process interrupted (Ctrl+C).
+- Re-run steps manually or restart `npm run setup` and let it complete.
+
+## 11) Known Constraints for Developers
+
+- No automated tests in repository currently.
+- No backend/API server; all persistent data is on-chain.
+- Admin controls are UI-only and not enforced by smart contract roles.
 
 # Step 3: In another terminal, compile the contract
 npm run compile
